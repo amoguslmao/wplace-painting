@@ -7,7 +7,6 @@ export default async function uploadImage(req: Request<{}, {}, Express.Multer.Fi
 
 	if (!file) {
 		return res.status(400).json({
-			status: 400,
 			message: "Image field is required"
 		});
 	}

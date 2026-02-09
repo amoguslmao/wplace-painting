@@ -15,7 +15,7 @@ const ml = multer({
 	})
 });
 
-route.post("/", ml.single("image"), uploadImage);
+route.post("/upload", ml.single("image"), uploadImage);
 route.get("/", getImages);
 
 export default route;
