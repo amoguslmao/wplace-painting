@@ -3,6 +3,7 @@ import multer from "multer";
 
 import uploadImage from "../../controllers/image/upload.js";
 import getImages from "../../controllers/image/get.js";
+import listImages from "../../controllers/image/list.js";
 
 const route = Router();
 
@@ -16,6 +17,7 @@ const ml = multer({
 });
 
 route.post("/upload", ml.single("image"), uploadImage);
+route.get("/list", listImages);
 route.get("/:imageName", getImages);
 
 export default route;
