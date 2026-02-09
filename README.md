@@ -1,1 +1,0 @@
-idk, random project to auto paint on wplace.live
