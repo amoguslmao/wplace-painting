@@ -1,0 +1,6 @@
+database/
+test/
+node_modules
+dist
+public
+.env
