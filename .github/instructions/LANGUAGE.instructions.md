@@ -1,0 +1,4 @@
+---
+applyTo: '**'
+---
+Always speak Vietnamese
