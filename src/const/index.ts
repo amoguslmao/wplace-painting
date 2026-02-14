@@ -8,6 +8,8 @@ export const UPLOADS_FOLDER = "uploads" as const;
 
 export const USERS_FILE_NAME = "users.json" as const;
 
+export const SETTINGS_FILE_NAME = "settings.json" as const;
+
 export const WPLACE_PALLETE: Record<number, ColorInformation> = {
 	1: { name: "Black", rgb: [0, 0, 0], premium: false },
 	2: { name: "Dark Gray", rgb: [60, 60, 60], premium: false },
