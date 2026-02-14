@@ -13,21 +13,6 @@ async function dataFolderCheck() {
 	}
 }
 
-async function usersJSONCheck() {
-	const path = `./${DATA_FOLDER}/${USERS_FILE_NAME}`;
-
-	try {
-		await fs.access(path, fs.constants.F_OK);
-	}
-	catch (err) {
-		console.log(`File ${USERS_FILE_NAME} doesnt exist. Creating new one...`);
-
-		await fs.writeFile(path, "[]");
-
-		console.log(`Created file "${USERS_FILE_NAME}"`);
-	}
-}
-
 async function uploadsFolderCheck() {
 	const path = `./${DATA_FOLDER}/${UPLOADS_FOLDER}`;
 
@@ -61,6 +46,5 @@ async function settingsJSONCheck() {
 export async function checker() {
 	await dataFolderCheck();
 	await uploadsFolderCheck();
-	await usersJSONCheck();
 	await settingsJSONCheck();
 }
