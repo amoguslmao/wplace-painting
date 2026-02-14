@@ -1,5 +1,5 @@
 import * as fs from "node:fs/promises";
-import { DATA_FOLDER, UPLOADS_FOLDER, USERS_FILE_NAME } from "../const/index.js";
+import { DATA_FOLDER, SETTINGS_FILE_NAME, UPLOADS_FOLDER, USERS_FILE_NAME } from "../const/index.js";
 
 async function dataFolderCheck() {
 	try {
@@ -43,8 +43,24 @@ async function uploadsFolderCheck() {
 	}
 }
 
+async function settingsJSONCheck() {
+	const path = `./${DATA_FOLDER}/${SETTINGS_FILE_NAME}`;
+
+	try {
+		await fs.access(path, fs.constants.F_OK);
+	} 
+	catch {
+		console.log(`File "${SETTINGS_FILE_NAME}" doesnt exist. Creating new one...`);
+
+		await fs.writeFile(path, "{}");
+
+		console.log(`Created "${SETTINGS_FILE_NAME}" file`);
+	}
+}
+
 export async function checker() {
 	await dataFolderCheck();
 	await uploadsFolderCheck();
 	await usersJSONCheck();
+	await settingsJSONCheck();
 }
