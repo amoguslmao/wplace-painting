@@ -34,7 +34,7 @@ async function uploadsFolderCheck() {
 	try {
 		await fs.access(path, fs.constants.F_OK);
 	}
-	catch (err) {
+	catch {
 		console.log(`Folder "${UPLOADS_FOLDER}" doesnt exist. Creating new one...`);
 
 		await fs.mkdir(path, { recursive: true });
