@@ -1,10 +1,18 @@
-interface AccountInformation {
-	data: WplaceUser,
-	cookie: string,
+export interface AccountInformation {
+	id: number,
+	user: WplaceUser,
+	jwtToken: string,
 	lastFetch: number,
 }
 
-interface WplaceUser {
+export interface DatabaseAccountInformation {
+	id: number,
+	user: string,
+	jwtToken: string,
+	lastFetch: number
+}
+
+export interface WplaceUser {
 	allianceId: number,
 	allianceRole: "admin" | "member",
 	charges: {
@@ -30,12 +38,7 @@ interface WplaceUser {
         }
     },
 	extraColorsBitmap: number,
-	favoriteLocations: {
-		id: number,
-		name: string,
-		latitude: number,
-		longitude: number
-	}[],
+	favoriteLocations: FavoriteLocation[],
 	flagsBitmap: string,
 	freeFlag: boolean,
 	id: number,
@@ -50,4 +53,11 @@ interface WplaceUser {
 	showLastPixel: boolean,
 	suspensionReason?: string,
 	timeoutUntil: string
+}
+
+export interface FavoriteLocation {
+	id: number,
+	name: number,
+	latitude: number,
+	longtitude: number
 }
