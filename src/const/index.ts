@@ -6,7 +6,7 @@ export const DATA_FOLDER = "database" as const;
 
 export const UPLOADS_FOLDER = "uploads" as const;
 
-export const USERS_FILE_NAME = "users.json" as const;
+export const DATABASE_NAME = "data.db" as const;
 
 export const SETTINGS_FILE_NAME = "settings.json" as const;
 
