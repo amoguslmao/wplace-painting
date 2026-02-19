@@ -5,6 +5,7 @@ import cors from "cors";
 
 import routers from "./routers/index.js";
 import { DatabaseInstance } from "./services/database.js";
+import { AccountManager } from "./services/accountManager.js";
 import { exit } from "./utils/process.js";
 
 // Database
@@ -17,6 +18,13 @@ process.on("SIGTERM", () => exit(db));
 
 // Checking the folder and some important file
 await checkFiles();
+
+// Accounts
+const accountManager = AccountManager.getInstance();
+
+await accountManager.init();
+
+console.log(`Account Manager is initilized`);
 
 // API
 const app = express();
