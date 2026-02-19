@@ -1,12 +1,22 @@
 import EnvConfig from "./config.js";
-import { checker } from "./utils/checker.js";
+import { checkFiles } from "./utils/checkFiles.js";
 import express from "express";
 import cors from "cors";
 
 import routers from "./routers/index.js";
+import { DatabaseInstance } from "./services/database.js";
+import { exit } from "./utils/process.js";
 
-// First, run checking the folder and some important file
-await checker();
+// Database
+const db = DatabaseInstance.getInstance();
+console.log(`Database started`);
+
+process.on("SIGINT", () => exit(db));
+process.on("SIGKILL", () => exit(db));
+process.on("SIGTERM", () => exit(db));
+
+// Checking the folder and some important file
+await checkFiles();
 
 // API
 const app = express();
