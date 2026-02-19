@@ -1,5 +1,5 @@
 import * as fs from "node:fs/promises";
-import { DATA_FOLDER, SETTINGS_FILE_NAME, UPLOADS_FOLDER, USERS_FILE_NAME } from "../const/index.js";
+import { DATA_FOLDER, SETTINGS_FILE_NAME, UPLOADS_FOLDER } from "../const/index.js";
 
 async function dataFolderCheck() {
 	try {
@@ -43,7 +43,7 @@ async function settingsJSONCheck() {
 	}
 }
 
-export async function checker() {
+export async function checkFiles() {
 	await dataFolderCheck();
 	await uploadsFolderCheck();
 	await settingsJSONCheck();
