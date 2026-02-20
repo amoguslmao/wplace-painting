@@ -143,4 +143,30 @@ export class AccountManager {
 
 		return `Added user ${result.name}#${result.id}`;
 	}
+
+	public deleteAccount(id: number) {
+		if (!this.initialized) {
+			throw new Error("Instance did not create correctly");
+		}
+
+		if (!this.accounts.has(id)) {
+			throw new Error(`Account with id ${id} doesnt exists`);
+		}
+
+		const account = this.accounts.get(id)!;
+
+		this.accounts.delete(id);
+
+		const database = DatabaseInstance.getInstance();
+
+		const deleteAccount = database.prepare<{ id: number }>(`
+			DELETE FROM users WHERE id = @id
+		`);
+
+		deleteAccount.run({
+			id
+		});
+
+		console.log(`User ${account.user.name}#${account.user.id} with Account ID ${id} has been deleted`);
+	}
 }
