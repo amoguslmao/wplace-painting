@@ -3,5 +3,4 @@ test/
 temp/
 node_modules
 dist
-public
 .env
