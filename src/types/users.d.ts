@@ -13,8 +13,8 @@ export interface DatabaseAccountInformation {
 }
 
 export interface WplaceUser {
-	allianceId: number,
-	allianceRole: "admin" | "member",
+	allianceId?: number,
+	allianceRole?: "admin" | "member",
 	charges: {
 		cooldownMs: number,
 		count: number,
