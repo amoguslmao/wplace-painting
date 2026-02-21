@@ -48,7 +48,7 @@ export class AccountManager {
 	 * @param jwtToken 
 	 * @returns The reason if added successfully
 	 */
-	public async addAccount(jwtToken: string): Promise<string> {
+	public async addAccount(jwtToken: string): Promise<{ status: "success" | "failed", message: string }> {
 		if (!this.initialized) {
 			throw new Error("Instance did not create correctly");
 		}
@@ -87,7 +87,12 @@ export class AccountManager {
 		});
 
 		if (!response.ok) {
-			throw new Error(`An error occured when fetching\n ${await response.text()}`);
+			console.warn(`An error occured when fetching\n ${await response.text()}`);
+
+			return {
+				status: "failed",
+				message: `An error occured when fetching\n ${await response.text()}`
+			}
 		}
 
 		const result = await response.json() as WplaceUser;
@@ -106,7 +111,10 @@ export class AccountManager {
 				
 				account.jwtToken = jwtToken;
 
-				return `User ${account.user.name}#${account.user.id} has been added before`;
+				return {
+					status: "success",
+					message: `User ${account.user.name}#${account.user.id} has been added before`
+				};
 			}
 		}
 
@@ -141,7 +149,10 @@ export class AccountManager {
 
 		console.log(`Added user ${result.name}#${result.id}`);
 
-		return `Added user ${result.name}#${result.id}`;
+		return {
+			status: "success",
+			message: `Added user ${result.name}#${result.id}`
+		};
 	}
 
 	public deleteAccount(id: number) {
