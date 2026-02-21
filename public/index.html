@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - wplace-painting</title>
+  <link rel="stylesheet" href="/css/shared.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">W</div>
+        <span class="sidebar-title">Menu</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/" class="nav-item active">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+        <a href="/accounts/" class="nav-item">
+          <span class="nav-icon">👥</span>
+          <span class="nav-text">Quản lý Tài Khoản</span>
+        </a>
+        <a href="/templates/" class="nav-item">
+          <span class="nav-icon">🖼️</span>
+          <span class="nav-text">Quản lý Template</span>
+        </a>
+        <a href="/logs/" class="nav-item">
+          <span class="nav-icon">📋</span>
+          <span class="nav-text">Real-time Logs</span>
+        </a>
+        <a href="/queue/" class="nav-item">
+          <span class="nav-icon">⏳</span>
+          <span class="nav-text">Queue</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p class="text-muted">wplace-painting v1.0</p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+      <header class="dashboard-header">
+        <div class="header-content">
+          <h1>Dashboard</h1>
+          <div class="header-info">
+            <span class="status-indicator">🟢 Online</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="dashboard-main">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+          <div class="welcome-content">
+            <h2>Chào mừng đến với wplace-painting</h2>
+            <p>Đây là một công cụ quản lý tài khoản Wplace và tự động hóa vẽ hình ảnh lên Wplace.</p>
+          </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="stats-section">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">👥</div>
+              <div class="stat-info">
+                <div class="stat-label">Tài khoản</div>
+                <div class="stat-value" id="accountsCount">-</div>
+              </div>
+              <a href="/accounts/" class="stat-link">Xem chi tiết →</a>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">🖼️</div>
+              <div class="stat-info">
+                <div class="stat-label">Template</div>
+                <div class="stat-value" id="templatesCount">-</div>
+              </div>
+              <a href="/templates/" class="stat-link">Xem chi tiết →</a>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">⏳</div>
+              <div class="stat-info">
+                <div class="stat-label">Queue</div>
+                <div class="stat-value" id="queueCount">-</div>
+              </div>
+              <a href="/queue/" class="stat-link">Xem chi tiết →</a>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">📋</div>
+              <div class="stat-info">
+                <div class="stat-label">Logs</div>
+                <div class="stat-value" id="logsCount">-</div>
+              </div>
+              <a href="/logs/" class="stat-link">Xem chi tiết →</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="actions-section">
+          <h3>Hành động nhanh</h3>
+          <div class="actions-grid">
+            <div class="action-card">
+              <div class="action-icon">✨</div>
+              <h4>Thêm Tài Khoản</h4>
+              <p>Thêm một tài khoản Wplace mới bằng JWT Token</p>
+              <a href="/accounts/" class="btn-primary btn-sm">Đi tới →</a>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">🖼️</div>
+              <h4>Tạo Template</h4>
+              <p>Tạo một template mới để tự động vẽ hình ảnh</p>
+              <a href="/templates/" class="btn-primary btn-sm">Đi tới →</a>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">🔄</div>
+              <h4>Cập nhật Tài Khoản</h4>
+              <p>Fetch thông tin mới nhất từ tất cả tài khoản</p>
+              <button class="btn-primary btn-sm" onclick="bulkFetchAccounts()">Fetch Ngay</button>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">📊</div>
+              <h4>Xem Logs</h4>
+              <p>Kiểm tra logs thực tế từ server</p>
+              <a href="/logs/" class="btn-primary btn-sm">Xem Logs →</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Info Section -->
+        <section class="info-section">
+          <h3>Thông tin hệ thống</h3>
+          <div class="info-grid">
+            <div class="info-card">
+              <h4>API Base URL</h4>
+              <code>/api</code>
+            </div>
+
+            <div class="info-card">
+              <h4>Server Status</h4>
+              <span class="badge badge-success">Running</span>
+            </div>
+
+            <div class="info-card">
+              <h4>Version</h4>
+              <span>1.0.0</span>
+            </div>
+
+            <div class="info-card">
+              <h4>Last Updated</h4>
+              <span id="lastUpdated">-</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+          <h3>Các tính năng chính</h3>
+          <div class="features-list">
+            <div class="feature-item">
+              <span class="feature-icon">✅</span>
+              <div class="feature-content">
+                <h4>Quản lý Tài Khoản</h4>
+                <p>Thêm, xóa, và cập nhật thông tin các tài khoản Wplace. Bulk operations để quản lý hàng loạt tài khoản.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <span class="feature-icon">✅</span>
+              <div class="feature-content">
+                <h4>Quản lý Template</h4>
+                <p>Tạo và quản lý các template hình ảnh để tự động vẽ lên Wplace. Cấu hình settings cho mỗi template.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <span class="feature-icon">✅</span>
+              <div class="feature-content">
+                <h4>Real-time Logs</h4>
+                <p>Xem logs từ server theo thực tế. Tùy chỉnh tần suất fetch và số lượng logs hiển thị.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <span class="feature-icon">✅</span>
+              <div class="feature-content">
+                <h4>Queue Management</h4>
+                <p>Theo dõi các tài khoản đang charge và thời gian còn lại để hồi lại charge.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <span class="feature-icon">✅</span>
+              <div class="feature-content">
+                <h4>JWT Token Management</h4>
+              <p>Quản lý JWT Token của các tài khoản. Hỗ trợ bulk import token từ danh sách.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <span class="feature-icon">✅</span>
+              <div class="feature-content">
+                <h4>Responsive Design</h4>
+                <p>Giao diện responsive hoạt động tốt trên mọi thiết bị: desktop, tablet, và mobile.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="dashboard-footer">
+        <div class="footer-content">
+          <p>Made by <strong>amoguslmao.</strong> | <a href="https://github.com/amoguslmao/wplace-painting" target="_blank">GitHub Repository</a></p>
+          <p>&copy; 2026 wplace-painting. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script src="/js/shared.js"></script>
+  <script src="/js/api.js" type="module"></script>
+  <script src="dashboard.js" type="module"></script>
+</body>
+</html>

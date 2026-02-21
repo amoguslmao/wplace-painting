@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chỉnh sửa Tài Khoản - wplace-painting</title>
+  <link rel="stylesheet" href="/css/shared.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="main-content">
+      <div class="edit-account-container">
+        <div class="back-button">
+          <a href="/accounts/">← Quay lại</a>
+        </div>
+
+        <h1 id="pageTitle">Chỉnh sửa Tài Khoản</h1>
+
+        <div id="editFormContainer" class="edit-form-wrapper">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Đang tải thông tin tài khoản...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Xác nhận lưu -->
+  <div id="confirmSaveModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Xác nhận lưu thay đổi</h2>
+        <button class="close-btn" onclick="toggleModal('confirmSaveModal', false)">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn lưu những thay đổi này?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="toggleModal('confirmSaveModal', false)">Hủy</button>
+        <button class="btn-primary" onclick="submitChanges()">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/shared.js"></script>
+  <script src="/js/api.js" type="module"></script>
+  <script src="/js/jwtParser.js" type="module"></script>
+  <script src="script.js" type="module"></script>
+</body>
+</html>

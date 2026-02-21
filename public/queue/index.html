@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Queue - wplace-painting</title>
+  <link rel="stylesheet" href="/css/shared.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="main-content">
+      <div class="queue-container">
+        <h1>Queue - Hàng đợi Charges</h1>
+
+        <!-- Queue Stats -->
+        <div class="queue-stats">
+          <div class="stat-card">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-content">
+              <div class="stat-label">Tài khoản đang charge</div>
+              <div class="stat-value" id="chargingAccountCount">0</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-content">
+              <div class="stat-label">Charges tổng cộng</div>
+              <div class="stat-value" id="totalCharges">0</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">🔋</div>
+            <div class="stat-content">
+              <div class="stat-label">Charges được sử dụng</div>
+              <div class="stat-value" id="usedCharges">0</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-content">
+              <div class="stat-label">Thời gian cập nhật</div>
+              <div class="stat-value text-sm" id="updateTime">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="queue-controls">
+          <button class="btn-primary" onclick="fetchQueueNow()">🔄 Fetch Ngay</button>
+          <button class="btn-info" onclick="toggleAutoRefresh()">
+            <span id="autoRefreshStatus">🔴 Tắt Auto Refresh</span>
+          </button>
+          <button class="btn-secondary" onclick="toggleSortOrder()">
+            <span id="sortStatus">⬇️ Sắp xếp theo Thời gian (Cũ trước)</span>
+          </button>
+          <button class="btn-danger" onclick="clearQueue()">🗑️ Xóa Danh sách</button>
+        </div>
+
+        <!-- Queue List -->
+        <div id="queueContainer" class="queue-list">
+          <div class="empty-state">
+            <div class="emoji">📭</div>
+            <p>Chưa có dữ liệu</p>
+            <p class="text-muted">Nhấn "Fetch Ngay" để tải danh sách hoặc bật Auto Refresh</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/shared.js"></script>
+  <script src="/js/api.js" type="module"></script>
+  <script src="script.js" type="module"></script>
+</body>
+</html>

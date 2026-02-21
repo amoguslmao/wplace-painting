@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Template - wplace-painting</title>
+  <link rel="stylesheet" href="/css/shared.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="main-content">
+      <div class="templates-container">
+        <div class="templates-header">
+          <h1>Quản lý Template</h1>
+          <button class="btn-primary" onclick="showCreateTemplateModal()">+ Tạo Template Mới</button>
+        </div>
+
+        <div id="templatesContainer" class="templates-grid">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Đang tải danh sách template...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Tạo Template -->
+  <div id="createTemplateModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Tạo Template Mới</h2>
+        <button class="close-btn" onclick="toggleModal('createTemplateModal', false)">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="createTemplateForm">
+          <div class="form-group">
+            <label for="templateName">Tên Template:</label>
+            <input type="text" id="templateName" placeholder="Nhập tên template..." required />
+          </div>
+          <div class="form-group">
+            <label for="templateImage">Chọn Hình ảnh:</label>
+            <input type="file" id="templateImage" accept="image/*" required />
+          </div>
+          <div class="form-group">
+            <label for="templateDescription">Mô tả:</label>
+            <textarea id="templateDescription" placeholder="Mô tả template (tùy chọn)..." rows="4"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="toggleModal('createTemplateModal', false)">Hủy</button>
+        <button class="btn-primary" onclick="submitCreateTemplate()">Tạo Template</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Chi tiết Template -->
+  <div id="templateDetailModal" class="modal">
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h2 id="detailModalTitle">Chi tiết Template</h2>
+        <button class="close-btn" onclick="toggleModal('templateDetailModal', false)">&times;</button>
+      </div>
+      <div class="modal-body" id="detailModalBody">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="toggleModal('templateDetailModal', false)">Đóng</button>
+        <button class="btn-danger" onclick="deleteTemplate()">Xóa Template</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/shared.js"></script>
+  <script src="/js/api.js" type="module"></script>
+  <script src="script.js" type="module"></script>
+</body>
+</html>
