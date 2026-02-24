@@ -1,3 +1,3 @@
 export interface NeedJwtToken {
-	jwtToken: string
+	tokens: string[]
 }
