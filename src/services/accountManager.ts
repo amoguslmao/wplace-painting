@@ -87,11 +87,22 @@ export class AccountManager {
 		});
 
 		if (!response.ok) {
-			console.warn(`An error occured when fetching\n ${await response.text()}`);
+			const contentType = response.headers.get("Content-Type");
+
+			let responseText: string | object;
+
+			if (contentType && contentType.includes("application/json")) {
+				responseText = await response.json();
+			}
+			else {
+				responseText = await response.text();
+			}
+
+			console.warn(`An error occured when fetching\n${responseText}`);
 
 			return {
 				status: "failed",
-				message: `An error occured when fetching\n ${await response.text()}`
+				message: `An error occured when fetching\n${responseText}`
 			}
 		}
 
