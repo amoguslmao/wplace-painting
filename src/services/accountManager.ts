@@ -1,7 +1,7 @@
 import { Impit } from "impit";
 import { Account } from "../base/account.js";
 import { DatabaseInstance } from "./database.js";
-import { CookieJar } from "tough-cookie";
+import { Cookie, CookieJar } from "tough-cookie";
 import EnvConfig from "../config.js";
 import type { DatabaseAccountInformation, WplaceUser } from "../types/users.js";
 
@@ -109,6 +109,17 @@ export class AccountManager {
 		const result = await response.json() as WplaceUser;
 
 		const database = DatabaseInstance.getInstance();
+
+		// TODO: kiểm tra xem có token mới nhất include trong response header hay ko
+		const setCookies = response.headers.getSetCookie();
+
+		const newToken = setCookies.map(cookie => Cookie.parse(cookie)).find(cookie => cookie?.key === "j");
+
+		if (newToken) {
+			console.log(`Got a new JWT Token when adding user ${result.name}#${result.id}`);
+
+			jwtToken = newToken.value;
+		}
 
 		// Cần implement để check xem đã có account nào trước đã add vào chưa
 		// Nếu mà jwt token này đã có cái user id trong db và map rồi
