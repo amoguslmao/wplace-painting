@@ -160,11 +160,11 @@ export class AccountManager {
 			throw new Error("Instance did not create correctly");
 		}
 
-		if (!this.accounts.has(id)) {
+		const account = this.accounts.get(id);
+
+		if (!account) {
 			throw new Error(`Account with id ${id} doesnt exists`);
 		}
-
-		const account = this.accounts.get(id)!;
 
 		this.accounts.delete(id);
 
