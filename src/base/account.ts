@@ -1,5 +1,5 @@
 import { Impit } from "impit";
-import { CookieJar } from "tough-cookie";
+import { Cookie, CookieJar } from "tough-cookie";
 import { DatabaseInstance } from "../services/database.js";
 
 import EnvConfig from "../config.js";
@@ -119,6 +119,16 @@ export class Account {
 
 		if (response.ok) {
 			const result = await response.json() as WplaceUser;
+
+			const setCookies = response.headers.getSetCookie();
+
+			const newToken = setCookies.map(cookie => Cookie.parse(cookie)).find(cookie => cookie?.key === "j");
+
+			if (newToken) {
+				console.log(`Got a new JWT Token when fetching /me`);
+
+				this.jwtToken = newToken.value;
+			}
 
 			this.user = result;
 
