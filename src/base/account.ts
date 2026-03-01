@@ -4,6 +4,7 @@ import { DatabaseInstance } from "../services/database.js";
 
 import EnvConfig from "../config.js";
 import type { DatabaseAccountInformation, WplaceUser } from "../types/users.js";
+import type { OperationResult } from "../types/utils.js";
 
 export class Account {
 	private impit!: Impit;
@@ -138,6 +139,79 @@ export class Account {
 			const { name, id } = this.user;
 
 			throw new Error(`Could not fetch user ${name}#${id}\n${await response.text()}`);
+		}
+	}
+
+	public async updateUser(name: string, showLastPixel: boolean = this.user.showLastPixel): Promise<OperationResult> {
+		if (!this.init) {
+			throw new Error("Account didnt started correctly");
+		}
+
+		if (name === this.user.name) {
+			return {
+				status: "success",
+				message: "Username is the same as the current one"
+			}
+		}
+
+		const lastUsername = this.user.name;
+
+		// Wplace sử dụng POST thay vì PUT để gửi data cần thay đổi lên server
+		// Và thay vì dùng PATCH để update từng phần thì lại sử dụng PUT, funny
+		const response = await this.impit.fetch(`${EnvConfig.baseURL}/me/update`, {
+			method: "POST",
+			body: JSON.stringify({
+				name,
+				showLastPixel
+			}),
+			headers: {
+				"Accept": "*/*",
+				"Accept-Encoding": "gzip, deflate, br, zstd",
+				"Accept-Language": "vi,en-US;q=0.9,en;q=0.8,vi-VN;q=0.7",
+				"Cache-Control": "no-cache",
+				"Origin": "https://wplace.live",
+				"Pragma": "no-cache",
+				"Priority": "u=1, i",
+				"Referer": "https://wplace.live/",
+				"Sec-Ch-Ua": `"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"`,
+				"Sec-Ch-Ua-Mobile": `?0`,
+				"Sec-Ch-Ua-Platform": `"Windows"`,
+				"Sec-Fetch-Dest": "empty",
+				"Sec-Fetch-Mode": "cors",
+				"Sec-Fetch-Site": "same-site",
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+			}
+		});
+
+		if (!response.ok) {
+			// Nghĩa là có thể không thể thay đổi tên được
+			if (response.status === 400) {
+				const result = await response.json() as { error: string, status: number };
+
+				const [reason, days] = result.error.split(":");
+
+				return {
+					status: "failed",
+					message: `Need to wait ${days} days before changing new name`
+				}
+			}
+			else if (response.status === 401) {
+				const { name, id } = this.user;
+
+				throw new Error(`Could not fetch user ${name}#${id}\n${await response.text()}`);
+			}
+		}
+
+		// Hành vi fetch `/me` sau khi rename như trên web
+		await this.me();
+
+		const message = `Renamed successfully from ${lastUsername}#${this.user.id} to ${this.user.name}#${this.user.id}`;
+
+		console.log(message);
+
+		return {
+			status: "success",
+			message: message
 		}
 	}
 }
