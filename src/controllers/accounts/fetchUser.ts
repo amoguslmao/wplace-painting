@@ -4,12 +4,6 @@ import { AccountManager } from "../../services/accountManager.js";
 export default async function fetchUser(req: Request<{ id: string }>, res: Response) {
 	const accountId = Number(req.params.id);
 
-	if (!accountId) {
-		return res.status(400).json({
-			message: "Param `accountId` is required."
-		});
-	}
-
 	const accountManager = AccountManager.getInstance();
 
 	const account = accountManager.accounts.get(accountId);
