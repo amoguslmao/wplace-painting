@@ -3,7 +3,7 @@ import type { NeedJwtToken } from "../../types/request.js";
 import { AccountManager } from "../../services/accountManager.js";
 import { sleep } from "../../utils/promises.js";
 
-export default async function addNewAccount(req: Request<{}, {}, NeedJwtToken>, res: Response) {
+export default async function bulkAddAccounts(req: Request<{}, {}, NeedJwtToken>, res: Response) {
 	if (!req.body.tokens) {
 		return res.status(400).json({
 			message: "Field 'jwtTokens' is required"
