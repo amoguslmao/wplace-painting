@@ -4,6 +4,7 @@ import { DatabaseInstance } from "./database.js";
 import { Cookie, CookieJar } from "tough-cookie";
 import EnvConfig from "../config.js";
 import type { DatabaseAccountInformation, WplaceUser } from "../types/users.js";
+import type { OperationResult } from "../types/utils.js";
 
 export class AccountManager {
 	private initialized = false;
@@ -48,7 +49,7 @@ export class AccountManager {
 	 * @param jwtToken 
 	 * @returns The reason if added successfully
 	 */
-	public async addAccount(jwtToken: string): Promise<{ status: "success" | "failed", message: string }> {
+	public async addAccount(jwtToken: string): Promise<OperationResult> {
 		if (!this.initialized) {
 			throw new Error("Instance did not create correctly");
 		}
