@@ -6,6 +6,7 @@ import deleteAccount from "../../controllers/accounts/deleteAccount.js";
 import fetchUser from "../../controllers/accounts/fetchUser.js";
 import renameUser from "../../controllers/accounts/renameUser.js";
 import joinAlliance from "../../controllers/accounts/joinAlliance.js";
+import leaveAlliance from "../../controllers/accounts/leaveAlliance.js";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.delete(`/:id`, deleteAccount)
 router.get(`/:id/user/fetch`, fetchUser);
 router.patch(`/:id/user/name`, renameUser);
 router.post(`/:id/user/alliance/join`, joinAlliance);
+router.delete(`/:id/user/alliance/leave`, leaveAlliance);
 
 export default router;
