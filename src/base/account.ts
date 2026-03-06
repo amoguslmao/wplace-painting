@@ -49,6 +49,13 @@ export class Account {
 	public set jwtToken(value: string) {
 		this._jwtToken = value;
 
+
+		const jwtValue = `j=${value}; Path=/`;
+
+		this.cookieJar.setCookieSync(jwtValue, "https://backend.wplace.live/");
+		this.cookieJar.setCookieSync(jwtValue, "https://wplace.live/");
+
+		
 		const database = DatabaseInstance.getInstance();
 
 		const updateJwtToken = database.prepare<{
@@ -64,6 +71,8 @@ export class Account {
 			jwtToken: value,
 			id: this.id
 		});
+
+		console.log(`New token has been setted.`);
 	}
 
 	public get user(): WplaceUser {
