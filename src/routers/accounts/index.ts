@@ -11,7 +11,7 @@ const router = Router();
 
 router.get(`/`, getAllAccounts);
 router.post(`/add`, bulkAddAccounts);
-router.delete(`/:id`, deleteAccount)
+router.delete(`/:id`, deleteAccount);
 
 router.use(`/bulk`, bulkRouter);
 router.use(`/:id`, idRouter);
