@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import type { JoinAlliance } from "../../types/request.js";
-import { AccountManager } from "../../services/accountManager.js";
+import type { JoinAlliance } from "../../../types/request.js";
+import { AccountManager } from "../../../services/accountManager.js";
 
 export default async function joinAlliance(req: Request<{ id: string }, {}, JoinAlliance>, res: Response) {
 	if (!req.body || !req.body.allianceUUID) {

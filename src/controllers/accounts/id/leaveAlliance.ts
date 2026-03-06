@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { AccountManager } from "../../services/accountManager.js";
+import { AccountManager } from "../../../services/accountManager.js";
 
 export default async function leaveAlliance(req: Request<{ id: string }>, res: Response) {
 	const accountId = Number(req.params.id);
