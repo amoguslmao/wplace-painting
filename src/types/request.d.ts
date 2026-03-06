@@ -5,3 +5,7 @@ export interface NeedJwtToken {
 export interface RenameUser {
 	name: string
 }
+
+export interface JoinAlliance {
+	allianceUUID: string
+}
