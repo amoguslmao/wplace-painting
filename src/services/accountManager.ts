@@ -82,6 +82,8 @@ export class AccountManager {
 		});
 
 		if (!response.ok) {
+			// Cần kiểm tra xem có phải mã 401 không
+			// Nếu là mã 401 thì báo lại là token hết hạn hoặc không tồn tại
 			const contentType = response.headers.get("Content-Type");
 
 			let responseText: string | object;
@@ -93,11 +95,12 @@ export class AccountManager {
 				responseText = await response.text();
 			}
 
-			console.warn(`An error occured when fetching\n${responseText}`);
+			console.warn(`An error occured when fetching:`, responseText);
 
 			return {
 				status: "failed",
-				message: `An error occured when fetching\n${responseText}`
+				message: `An error occured when fetching`,
+				data: responseText
 			}
 		}
 
