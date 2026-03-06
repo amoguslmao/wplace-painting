@@ -294,4 +294,57 @@ export class Account {
 			data: await response.json()
 		}
 	}
+
+	public async leaveAlliance(): Promise<OperationResult<string>> {
+		if (!this.init) {
+			throw new Error("Account didnt started correctly.");
+		}
+
+		if (!this.user.allianceId) {
+			return {
+				status: "failed",
+				message: "User doesnt in any alliance to leave."
+			}
+		}
+
+		const response = await this.impit.fetch(`${EnvConfig.baseURL}/alliance/leave`, {
+			method: "POST",
+			headers: {
+				"Accept": "*/*",
+				"Accept-Encoding": "gzip, deflate, br, zstd",
+				"Accept-Language": "vi,en-US;q=0.9,en;q=0.8,vi-VN;q=0.7",
+				"Cache-Control": "no-cache",
+				"Origin": "https://wplace.live",
+				"Pragma": "no-cache",
+				"Priority": "u=1, i",
+				"Referer": "https://wplace.live/",
+				"Sec-Ch-Ua": `"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"`,
+				"Sec-Ch-Ua-Mobile": `?0`,
+				"Sec-Ch-Ua-Platform": `"Windows"`,
+				"Sec-Fetch-Dest": "empty",
+				"Sec-Fetch-Mode": "cors",
+				"Sec-Fetch-Site": "same-site",
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+			}
+		});
+
+		if (!response.ok) {
+			console.error(`An error occured when leaving alliance for user ${this.user.name}#${this.user.id}`);
+
+			console.error(await response.text());
+
+			return {
+				status: "failed",
+				message: "An error occured when leaving alliance.",
+				data: await response.text()
+			}
+		}
+
+		console.log(`User ${this.user.name}#${this.user.id} has been left the alliance.`);
+
+		return {
+			status: "success",
+			message: "User has been left the alliance"
+		}
+	}
 }
