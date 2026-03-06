@@ -43,13 +43,7 @@ export class AccountManager {
 		this.initialized = true;
 	}
 
-
-	/**
-	 * 
-	 * @param jwtToken 
-	 * @returns The reason if added successfully
-	 */
-	public async addAccount(jwtToken: string): Promise<OperationResult> {
+	public async addAccount(jwtToken: string): Promise<OperationResult<string | object>> {
 		if (!this.initialized) {
 			throw new Error("Instance did not create correctly");
 		}
@@ -197,9 +191,7 @@ export class AccountManager {
 			DELETE FROM users WHERE id = @id
 		`);
 
-		deleteAccount.run({
-			id
-		});
+		deleteAccount.run({ id });
 
 		console.log(`User ${account.user.name}#${account.user.id} with Account ID ${id} has been deleted`);
 	}
