@@ -223,4 +223,75 @@ export class Account {
 			message: message
 		}
 	}
+
+	public async joinAlliance(allianceUUID: string): Promise<OperationResult<object>> {
+		if (!this.init) {
+			throw new Error("Account didnt started correctly");
+		}
+
+		if (this.user.allianceId) {
+			return {
+				status: "success",
+				message: "User has been joined an alliance before"
+			}
+		}
+
+		const response = await this.impit.fetch(`${EnvConfig.baseURL}/alliance/join/${allianceUUID}`, {
+			headers: {
+				"Accept": "*/*",
+				"Accept-Encoding": "gzip, deflate, br, zstd",
+				"Accept-Language": "vi,en-US;q=0.9,en;q=0.8,vi-VN;q=0.7",
+				"Cache-Control": "no-cache",
+				"Origin": "https://wplace.live",
+				"Pragma": "no-cache",
+				"Priority": "u=1, i",
+				"Referer": "https://wplace.live/",
+				"Sec-Ch-Ua": `"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"`,
+				"Sec-Ch-Ua-Mobile": `?0`,
+				"Sec-Ch-Ua-Platform": `"Windows"`,
+				"Sec-Fetch-Dest": "empty",
+				"Sec-Fetch-Mode": "cors",
+				"Sec-Fetch-Site": "same-site",
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+			}
+		});
+
+		if (!response.ok) {
+			switch (response.status) {
+				case 401: {
+					console.error(`Got 401 when joining alliance, does something get bugged?`);
+
+					return {
+						message: "Unauthorized.",
+						status: "failed"
+					}
+				}
+				case 403: {
+					return {
+						message: "User has been banned from this alliance.",
+						status: "failed"
+					}
+				}
+				case 400:
+				case 404: {
+					return {
+						message: "Alliance UUID doesnt exists or invalid invite.",
+						status: "failed"
+					}
+				}
+
+				default: {
+					throw new Error("Unknow error when joining alliance.");
+				}
+			}
+		}
+
+		console.log(`User ${this.user.name}#${this.user.id} has been joined alliance successfully.`);
+
+		return {
+			status: "success",
+			message: "User has been joined alliance successfully.",
+			data: await response.json()
+		}
+	}
 }
