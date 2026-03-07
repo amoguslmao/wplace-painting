@@ -3,3 +3,5 @@ export interface OperationResult<Data = void> {
 	message: string,
 	data?: Data
 }
+
+export type EventStreamType = "success" | "failed" | "error";
