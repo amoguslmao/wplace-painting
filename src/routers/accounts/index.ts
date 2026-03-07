@@ -6,11 +6,13 @@ import bulkRouter from "./bulk/index.js";
 import getAllAccounts from "../../controllers/accounts/getAllAccounts.js";
 import bulkAddAccounts from "../../controllers/accounts/addNewAccount.js";
 import deleteAccount from "../../controllers/accounts/deleteAccount.js";
+import getAccountById from "../../controllers/accounts/getAccountById.js";
 
 const router = Router();
 
 router.get(`/`, getAllAccounts);
 router.post(`/add`, bulkAddAccounts);
+router.get(`/:id`, getAccountById);
 router.delete(`/:id`, deleteAccount);
 
 router.use(`/bulk`, bulkRouter);
