@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import type { NeedJwtToken } from "../../types/request.js";
 import { AccountManager } from "../../services/accountManager.js";
 import { sleep } from "../../utils/promises.js";
+import { sendSSE } from "../../utils/string.js";
 
 export default async function bulkAddAccounts(req: Request<{}, {}, NeedJwtToken>, res: Response) {
 	if (!req.body.tokens) {
@@ -51,11 +52,4 @@ export default async function bulkAddAccounts(req: Request<{}, {}, NeedJwtToken>
 
 		console.error(`An error occurred in endpoint ${req.url}`, error);
 	}
-}
-
-function sendSSE(data: string, event: "success" | "failed" | "error"): string {
-	const eventLine = `event: ${event}`;
-	const dataLine = `data: ${data}`;
-
-	return `${eventLine}\n${dataLine}\n\n`;
 }
