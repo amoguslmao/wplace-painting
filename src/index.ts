@@ -4,9 +4,10 @@ import express from "express";
 import cors from "cors";
 
 import routers from "./routers/index.js";
+import { exit } from "./utils/process.js";
 import { DatabaseInstance } from "./services/database.js";
 import { AccountManager } from "./services/accountManager.js";
-import { exit } from "./utils/process.js";
+import { TemplateManager } from "./services/templateManager.js";
 
 // Database
 const db = DatabaseInstance.getInstance();
@@ -25,6 +26,13 @@ const accountManager = AccountManager.getInstance();
 await accountManager.init();
 
 console.log(`Account Manager is initilized`);
+
+// Templates
+const templateManager = TemplateManager.getInstance();
+
+templateManager.init();
+
+console.log(`Template Manager is initilized`);
 
 // API
 const app = express();
