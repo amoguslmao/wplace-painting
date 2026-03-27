@@ -19,6 +19,20 @@ export class DatabaseInstance extends Database {
 				user TEXT NOT NULL
 			);
 		`);
+
+		this.exec(`
+			CREATE TABLE IF NOT EXISTS templates(
+				id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+				createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				name TEXT NOT NULL DEFAULT '',
+				imageName TEXT NOT NULL,
+
+				imageInformation TEXT NOT NULL,
+				assignedAccounts TEXT NOT NULL,
+				coordinates TEXT NOT NULL,
+				setting TEXT NOT NULL
+			);
+		`);
 	}
 
 	public static getInstance() {
