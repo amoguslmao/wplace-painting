@@ -5,7 +5,8 @@
   "main": "dist/index.mjs",
   "scripts": {
     "build": "tsdown",
-    "start": "node ."
+    "start": "node .",
+    "check": "npx tsc --noEmit"
   },
   "type": "module",
   "keywords": [],
