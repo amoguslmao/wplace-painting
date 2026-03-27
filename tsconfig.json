@@ -42,6 +42,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
-  "include": ["src/**/*","public/**/*"],
+  "include": ["src/**/*","public/**/*", "tsdown.config.ts"],
   "exclude": ["dist", "node_modules"]
 }
