@@ -11,7 +11,7 @@ import getAccountById from "../../controllers/accounts/getAccountById.js";
 const router = Router();
 
 router.get(`/`, getAllAccounts);
-router.post(`/add`, bulkAddAccounts);
+router.post(`/`, bulkAddAccounts);
 router.get(`/:id`, getAccountById);
 router.delete(`/:id`, deleteAccount);
 
