@@ -2,9 +2,9 @@
   "name": "wplacer-painting",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "scripts": {
-    "build": "rimraf dist && npx tsc",
+    "build": "tsdown",
     "start": "node ."
   },
   "type": "module",
