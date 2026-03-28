@@ -24,7 +24,7 @@ export interface TemplateInformation {
 
 export interface TemplateImageInformation {
 	width: number,
-	heigth: number,
+	height: number,
 	usedColors: UsedColor[]
 }
 
