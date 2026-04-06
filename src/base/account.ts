@@ -5,6 +5,13 @@ import { DatabaseInstance } from "../services/database.js";
 import EnvConfig from "../config.js";
 import type { DatabaseAccountInformation, WplaceUser } from "../types/users.js";
 import type { OperationResult } from "../types/utils.js";
+import { 
+	FLAG_ITEM, 
+	MAX_CHARGE_ITEM, 
+	PAINT_CHARGE_ITEM, 
+	WPLACE_FLAGS 
+} from "../const/index.js";
+
 
 export class Account {
 	private impit!: Impit;
@@ -345,6 +352,226 @@ export class Account {
 		return {
 			status: "success",
 			message: "User has been left the alliance"
+		}
+	}
+
+	public async purchaseCharges(type: "paint_charge" | "max_charge", amount: number): Promise<OperationResult<string>> {
+		if (!this.init) {
+			throw new Error("Instance did not create correctly");
+		}
+
+		if (!Number.isInteger(amount)) {
+			throw new Error(`Param "amount" must be an integer`);
+		}
+
+		if (type === "paint_charge") {
+			const neededDroplet = PAINT_CHARGE_ITEM.value * amount;
+
+			if (this.user.droplets < neededDroplet) {
+				return {
+					message: `Account doesnt have enough droplet`,
+					status: "failed"
+				}
+			}
+
+			const response = await this.impit.fetch(`${EnvConfig.baseURL}/purchase`, {
+				method: "POST",
+				body: JSON.stringify({
+					product: {
+						id: PAINT_CHARGE_ITEM.itemId,
+						amount
+					}
+				}),
+				headers: {
+					"Accept": "*/*",
+					"Accept-Encoding": "gzip, deflate, br, zstd",
+					"Accept-Language": "vi,en-US;q=0.9,en;q=0.8,vi-VN;q=0.7",
+					"Cache-Control": "no-cache",
+					"Origin": "https://wplace.live",
+					"Pragma": "no-cache",
+					"Priority": "u=1, i",
+					"Referer": "https://wplace.live/",
+					"Sec-Ch-Ua": `"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"`,
+					"Sec-Ch-Ua-Mobile": `?0`,
+					"Sec-Ch-Ua-Platform": `"Windows"`,
+					"Sec-Fetch-Dest": "empty",
+					"Sec-Fetch-Mode": "cors",
+					"Sec-Fetch-Site": "same-site",
+					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+				}
+			});
+
+			if (!response.ok) {
+				switch (response.status) {
+					case 403: {
+						return {
+							message: `Account do not have enough droplet`,
+							status: "failed"
+						}
+					}
+					default: {
+						return {
+							message: `Unknow error`,
+							status: "failed",
+							data: await response.text()
+						}
+					}
+				}
+			}
+
+			await this.me();
+
+			return {
+				message: `Successfully purchase ${amount} paint charge`,
+				status: "success"
+			}
+		}
+		else {
+			const neededDroplet = MAX_CHARGE_ITEM.value * amount;
+
+			if (this.user.droplets < neededDroplet) {
+				return {
+					message: `Account doesnt have enough droplet`,
+					status: "failed"
+				}
+			}
+
+			const response = await this.impit.fetch(`${EnvConfig.baseURL}/purchase`, {
+				method: "POST",
+				body: JSON.stringify({
+					product: {
+						id: MAX_CHARGE_ITEM.itemId,
+						amount
+					}
+				}),
+				headers: {
+					"Accept": "*/*",
+					"Accept-Encoding": "gzip, deflate, br, zstd",
+					"Accept-Language": "vi,en-US;q=0.9,en;q=0.8,vi-VN;q=0.7",
+					"Cache-Control": "no-cache",
+					"Origin": "https://wplace.live",
+					"Pragma": "no-cache",
+					"Priority": "u=1, i",
+					"Referer": "https://wplace.live/",
+					"Sec-Ch-Ua": `"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"`,
+					"Sec-Ch-Ua-Mobile": `?0`,
+					"Sec-Ch-Ua-Platform": `"Windows"`,
+					"Sec-Fetch-Dest": "empty",
+					"Sec-Fetch-Mode": "cors",
+					"Sec-Fetch-Site": "same-site",
+					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+				}
+			});
+
+			if (!response.ok) {
+				switch (response.status) {
+					case 403: {
+						return {
+							message: `Account do not have enough droplet`,
+							status: "failed"
+						}
+					}
+					case 409: {
+						return {
+							message: `This account already have this item`,
+							status: "failed"
+						}
+					}
+					default: {
+						return {
+							message: `Unknow error`,
+							status: "failed",
+							data: await response.text()
+						}
+					}
+				}
+			}
+
+			await this.me();
+
+			return {
+				message: `Successfully purchase ${amount} max charge`,
+				status: "success"
+			}
+		}
+	}
+
+	public async purchaseFlags(flagId: number): Promise<OperationResult<string>> {
+		if (!this.init) {
+			throw new Error("Instance did not create correctly");
+		}
+
+		const allFlagIds = Object.keys(WPLACE_FLAGS);
+
+		if (!allFlagIds.includes(String(flagId))) {
+			throw new Error(`Could not find any flag with ID ${flagId}`);
+		}
+
+		if (this.user.droplets < FLAG_ITEM.value) {
+			return {
+				message: "User doesnt have enough droplets",
+				status: "failed"
+			}
+		}
+
+		const response = await this.impit.fetch(`${EnvConfig.baseURL}/purchase`, {
+			method: "POST",
+			body: JSON.stringify({
+				product: {
+					id: FLAG_ITEM.itemId,
+					amount: 1,
+					variant: flagId
+				}
+			}),
+			headers: {
+				"Accept": "*/*",
+				"Accept-Encoding": "gzip, deflate, br, zstd",
+				"Accept-Language": "vi,en-US;q=0.9,en;q=0.8,vi-VN;q=0.7",
+				"Cache-Control": "no-cache",
+				"Origin": "https://wplace.live",
+				"Pragma": "no-cache",
+				"Priority": "u=1, i",
+				"Referer": "https://wplace.live/",
+				"Sec-Ch-Ua": `"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"`,
+				"Sec-Ch-Ua-Mobile": `?0`,
+				"Sec-Ch-Ua-Platform": `"Windows"`,
+				"Sec-Fetch-Dest": "empty",
+				"Sec-Fetch-Mode": "cors",
+				"Sec-Fetch-Site": "same-site",
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+			}
+		});
+
+
+		if (!response.ok) {
+			switch (response.status) {
+				case 403: {
+					return {
+						message: `Account do not have enough droplet`,
+						status: "failed"
+					}
+				}
+				case 409: {
+					return {
+						message: `Account already have this flag`,
+						status: "failed"
+					}
+				}
+				default: {
+					return {
+						message: `Unknow error`,
+						status: "failed",
+						data: await response.text()
+					}
+				}
+			}
+		}
+
+		await this.me();
+
+		return {
+			message: `Successfully purchased flag with ID ${flagId}`,
+			status: "success"
 		}
 	}
 }
