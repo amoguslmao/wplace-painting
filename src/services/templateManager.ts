@@ -35,7 +35,7 @@ export class TemplateManager {
 		this.initialized = true;
 	}
 
-	public addTemplate(data: TemplateInformation) {
+	public addTemplate(data: Omit<TemplateInformation, "id" | "createdAt">) {
 		if (!this.initialized) {
 			throw new Error("Instance did not create correctly");
 		}
