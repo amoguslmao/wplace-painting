@@ -1,4 +1,9 @@
-import type { TemplateDatabase, TemplateCoordinates, TemplateSetting, TemplateImageInformation } from "../types/template.js";
+import type { 
+	TemplateDatabase, 
+	TemplateCoordinates, 
+	TemplateSetting, 
+	TemplateImageInformation 
+} from "../types/template.js";
 
 export class Template {
 	public readonly id: number;
