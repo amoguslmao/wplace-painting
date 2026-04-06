@@ -10,6 +10,21 @@ export const DATABASE_NAME = "data.db" as const;
 
 export const SETTINGS_FILE_NAME = "settings.json" as const;
 
+export const MAX_CHARGE_ITEM = {
+	itemId: 70,
+	value: 500
+} as const;
+
+export const PAINT_CHARGE_ITEM = {
+	itemId: 80,
+	value: 500
+} as const;
+
+export const FLAG_ITEM = {
+	itemId: 110,
+	value: 20_000
+} as const;
+
 export const WPLACE_PALLETE: Record<number, ColorInformation> = {
 	1: { name: "Black", rgb: [0, 0, 0], premium: false },
 	2: { name: "Dark Gray", rgb: [60, 60, 60], premium: false },
