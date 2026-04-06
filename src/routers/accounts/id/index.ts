@@ -7,7 +7,7 @@ import renameUser from "../../../controllers/accounts/id/renameUser.js";
 import purchaseChargesUser from "../../../controllers/accounts/id/purchaseCharges.js";
 import purchaseFlagUser from "../../../controllers/accounts/id/purchaseFlag.js";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 router.get(`/user/fetch`, fetchUser);
 router.patch(`/user/name`, renameUser);
