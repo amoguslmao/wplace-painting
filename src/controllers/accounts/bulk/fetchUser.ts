@@ -40,7 +40,7 @@ export default async function bulkFetchUser(req: Request<{}, {}, BulkFetchUser>,
 				sendSSE(JSON.stringify({
 					message: `Could not find account with ID ${accountId}`,
 					accountId
-				}), "failed")
+				}), "error")
 			);
 			continue;
 		}

@@ -46,7 +46,7 @@ export default async function bulkJoinAlliance(req: Request<{}, {}, BulkJoinAlli
 				sendSSE(JSON.stringify({
 					message: `Could not find account with ID ${accountId}`,
 					accountId
-				}), "failed")
+				}), "error")
 			);
 			continue;
 		}
