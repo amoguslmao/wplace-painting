@@ -26,9 +26,9 @@ export default async function fetchUser(req: Request<{ id: string }>, res: Respo
 	} catch (error) {
 		res.status(500).json({
 			message: `An error occurred while fetching user with account ID ${accountId}`,
-			cause: error
+			cause: (error as Error).message
 		});
 
-		console.error(error);
+		console.error((error as Error).message);
 	}
 }
