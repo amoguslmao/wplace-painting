@@ -34,3 +34,5 @@ export type BulkLeaveAlliance = BulkAccountAction;
 export type BulkPurchaseCharges = BulkAccountAction & PurchaseCharges;
 
 export type BulkPurchaseFlags = BulkAccountAction & PurchaseFlags;
+
+export type AddNewTemplate = Omit<TemplateInformation, "id" | "createdAt">;
