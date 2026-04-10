@@ -30,7 +30,7 @@ export interface TemplateImageInformation {
 
 export interface UsedColor {
 	total: number,
-	colorId: number
+	colorId: number | null
 }
 
 export type TemplateCoordinates = [
