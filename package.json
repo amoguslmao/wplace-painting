@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsdown",
     "start": "node .",
-    "check": "npx tsc --noEmit"
+    "check": "tsc --noEmit"
   },
   "type": "module",
   "keywords": [],
