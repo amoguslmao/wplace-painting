@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import * as fs from "node:fs/promises";
 import { DATA_FOLDER, UPLOADS_FOLDER } from "../../const/index.js";
 
-export default async function getImages(req: Request<{ imageName: string }>, res: Response, next: NextFunction) {
+export default async function getImageByName(req: Request<{ imageName: string }>, res: Response, next: NextFunction) {
 	const { imageName } = req.params;
 
 	if (!imageName) {
