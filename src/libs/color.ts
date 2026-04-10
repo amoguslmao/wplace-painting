@@ -14,5 +14,5 @@ export function matchingPallete(rgb: RGBArray) {
 		return arrayEquals(rgb, current.rgb);
 	});
 
-	return result ? Number(result) : undefined;
+	return result ? Number(result) : null;
 }
