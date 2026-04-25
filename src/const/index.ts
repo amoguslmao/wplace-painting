@@ -1,4 +1,5 @@
 import type { ColorInformation } from "../types/color.js";
+import type { SettingFields } from "../types/settings.js";
 
 export const TILE_SIZE = 1000 as const;
 
@@ -24,6 +25,11 @@ export const FLAG_ITEM = {
 	itemId: 110,
 	value: 20_000
 } as const;
+
+export const DEFAULT_APP_SETTINGS: SettingFields = {
+	bulkOperationCooldown: 5000,
+	paintMethod: "linear"
+}
 
 export const WPLACE_PALLETE: Record<number, ColorInformation> = {
 	1: { name: "Black", rgb: [0, 0, 0], premium: false },
