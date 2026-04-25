@@ -8,6 +8,7 @@ import { exit } from "./utils/process.js";
 import { DatabaseInstance } from "./services/database.js";
 import { AccountManager } from "./services/accountManager.js";
 import { TemplateManager } from "./services/templateManager.js";
+import { AppSetting } from "./services/settings.js";
 
 // Database
 const db = DatabaseInstance.getInstance();
@@ -19,6 +20,13 @@ process.on("SIGTERM", () => exit(db));
 
 // Checking the folder and some important file
 await checkFiles();
+
+// Setting
+const appSetting = AppSetting.getInstance();
+
+await appSetting.loadSetting();
+
+console.log(`App Setting is loaded`);
 
 // Accounts
 const accountManager = AccountManager.getInstance();
