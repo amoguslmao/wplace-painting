@@ -40,3 +40,5 @@ export type BulkPurchaseCharges = BulkAccountAction & PurchaseCharges;
 export type BulkPurchaseFlags = BulkAccountAction & PurchaseFlags;
 
 export type AddNewTemplate = Omit<TemplateInformation, "id" | "createdAt">;
+
+export type UpdateTemplate = Omit<TemplateInformation, "id" | "createdAt" | "imageName" | "imageInformation">;
