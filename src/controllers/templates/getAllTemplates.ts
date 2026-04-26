@@ -1,13 +1,21 @@
 import type { Request, Response } from "express";
 import { TemplateManager } from "../../services/templateManager.js";
-import type { TemplateInformation } from "../../types/template.js";
+import type { TemplateCoordinates } from "../../types/template.js";
 
 export default async function getAllTemplates(_: Request, res: Response) {
 	const templateManager = TemplateManager.getInstance();
 
 	const { templates } = templateManager;
 
-	const result: TemplateInformation[] = [];
+	const result: {
+		id: number,
+		name: string,
+		createdAt: string,
+		imageName: string,
+
+		totalAccounts: number,
+		coordinates: TemplateCoordinates
+	}[] = [];
 
 	for (const template of templates.values()) {
 		result.push({
@@ -16,10 +24,8 @@ export default async function getAllTemplates(_: Request, res: Response) {
 			createdAt: template.createdAt,
 			imageName: template.imageName,
 
-			imageInformation: template.imageInformation,
-			assignedAccounts: template.assignedAccounts,
-			coordinates: template.coordinates,
-			setting: template.setting
+			totalAccounts: template.assignedAccounts.length,
+			coordinates: template.coordinates
 		});
 	}
 
