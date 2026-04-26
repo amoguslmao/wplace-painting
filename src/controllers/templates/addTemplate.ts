@@ -3,12 +3,17 @@ import { TemplateInformationSchema } from "../../validate/index.js";
 import { z } from "zod";
 import { TemplateManager } from "../../services/templateManager.js";
 import type { AddNewTemplate } from "../../types/request.js";
+import * as fs from "node:fs/promises";
+import { DATA_FOLDER, UPLOADS_FOLDER } from "../../const/index.js";
 
-export default function addNewTemplate(req: Request<{}, {}, AddNewTemplate>, res: Response) {
+export default async function addNewTemplate(req: Request<{}, {}, AddNewTemplate>, res: Response) {
 	try {
 		const template = TemplateInformationSchema.parse(req.body);
 
 		const templateManager = TemplateManager.getInstance();
+
+		await fs.access(`./${DATA_FOLDER}/${UPLOADS_FOLDER}/${template.imageName}`, fs.constants.F_OK);
+		//console.debug(`Found the image that has in template`);
 
 		templateManager.addTemplate(template);
 
