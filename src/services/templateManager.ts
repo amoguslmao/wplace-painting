@@ -1,11 +1,15 @@
 import { Template } from "../base/template.js";
 import type { TemplateDatabase, TemplateInformation } from "../types/template.js";
+import type { OperationResult } from "../types/utils.js";
 import { DatabaseInstance } from "./database.js";
+import { ChildProcess, fork } from "node:child_process";
 
 export class TemplateManager {
 	private initialized = false;
 
 	private static _instance: TemplateManager | null = null;
+
+	private runningTemplates = new Map<number, ChildProcess>();
 
 	public templates = new Map<number, Template>();
 
@@ -100,5 +104,74 @@ export class TemplateManager {
 		removeTemplate.run({ id });
 
 		console.log(`Removed template "${template.name}" with ID ${id}`);
+	}
+
+	public startTemplate(id: number): OperationResult {
+		if (!this.initialized) {
+			throw new Error("Instance did not created correctly");
+		}
+
+		const template = this.templates.get(id);
+
+		if (!template) {
+			return {
+				message: `Could not find template with id ${id}`,
+				status: "failed"
+			}
+		}
+
+		if (this.runningTemplates.has(template.id)) {
+			return {
+				message: `The template ${template.name}#${template.id} is currently running`,
+				status: "failed"
+			}
+		}
+
+		const templateProcess = fork(`./dist/workers/paintTemplate.mjs`);
+
+		templateProcess.on("message", (message) => {
+			console.log(message);
+		});
+
+		templateProcess.send({
+			template
+		});
+
+		this.runningTemplates.set(template.id, templateProcess);
+
+		return {
+			message: `Started template ${template.name}#${template.id}`,
+			status: "success"
+		}
+	}
+
+	public stopTemplate(id: number): OperationResult {
+		if (!this.initialized) {
+			throw new Error("Instance did not created correctly");
+		}
+
+		const template = this.templates.get(id);
+
+		if (!template) {
+			throw new Error(`Could not find template with id ${id}`);
+		}
+
+		const templateProcess = this.runningTemplates.get(template.id);
+
+		if (!templateProcess) {
+			return {
+				message: `Template ${template.name}#${template.id} is not started to stop`,
+				status: "failed"
+			}
+		}
+
+		templateProcess.kill();
+
+		console.log(`Stopped template ${template.name}#${template.id}`);
+
+		return {
+			message: `Stopped template ${template.name}#${template.id}`,
+			status: "success"
+		}
 	}
 }
