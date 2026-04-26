@@ -1,4 +1,5 @@
 import { Template } from "../base/template.js";
+import type { UpdateTemplate } from "../types/request.js";
 import type { TemplateDatabase, TemplateInformation } from "../types/template.js";
 import type { OperationResult } from "../types/utils.js";
 import { DatabaseInstance } from "./database.js";
@@ -104,6 +105,25 @@ export class TemplateManager {
 		removeTemplate.run({ id });
 
 		console.log(`Removed template "${template.name}" with ID ${id}`);
+	}
+
+	public updateTemplate(id: number, updateTemplate: UpdateTemplate) {
+		if (!this.initialized) {
+			throw new Error("Instance did not created correctly");
+		}
+
+		const template = this.templates.get(id);
+
+		if (!template) {
+			throw new Error(`Could not find any template with ID ${id}`);
+		}
+
+		template.name = updateTemplate.name;
+		template.assignedAccounts = updateTemplate.assignedAccounts;
+		template.coordinates = updateTemplate.coordinates;
+		template.setting = updateTemplate.setting;
+
+		console.log(`Updated the template ${template.name}#${template.id} successfully`);
 	}
 
 	public startTemplate(id: number): OperationResult {
