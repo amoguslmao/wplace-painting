@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import type { PurchaseFlags } from "../../../types/request.js";
+import type { IdParam, PurchaseFlags } from "../../../types/request.js";
 import { AccountManager } from "../../../services/accountManager.js";
 
-export default async function purchaseFlagUser(req: Request<{ id: number }, {}, PurchaseFlags>, res: Response) {
+export default async function purchaseFlagUser(req: Request<IdParam, {}, PurchaseFlags>, res: Response) {
 	const accountId = Number(req.params.id);
 
 	const accountManager = AccountManager.getInstance();

@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { AccountManager } from "../../services/accountManager.js";
+import type { IdParam } from "../../types/request.js";
 
-export default async function getAccountById(req: Request<{ id: string }>, res: Response) {
+export default async function getAccountById(req: Request<IdParam>, res: Response) {
 	const accountId = Number(req.params.id);
 
 	const accountManager = AccountManager.getInstance();

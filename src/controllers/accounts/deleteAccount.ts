@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { AccountManager } from "../../services/accountManager.js";
+import type { IdParam } from "../../types/request.js";
 
-export default function deleteAccount(req: Request<{ id: string }, {}, {}>, res: Response) {
+export default function deleteAccount(req: Request<IdParam, {}, {}>, res: Response) {
 	const accountId = Number(req.params.id);
 
 	if (!accountId) {

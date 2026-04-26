@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { TemplateManager } from "../../services/templateManager.js";
+import type { IdParam } from "../../types/request.js";
 
-export default async function getTemplateById(req: Request<{ id: number }>, res: Response) {
+export default async function getTemplateById(req: Request<IdParam>, res: Response) {
 	const templateId = Number(req.params.id);
 
 	const templateManager = TemplateManager.getInstance();

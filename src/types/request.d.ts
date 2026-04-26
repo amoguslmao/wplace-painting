@@ -4,6 +4,10 @@ export interface NeedJwtToken {
 	tokens: string[]
 }
 
+export interface IdParam {
+	id: string // Express khi parse param thì nó trả về string
+}
+
 export interface RenameUser {
 	name: string
 }

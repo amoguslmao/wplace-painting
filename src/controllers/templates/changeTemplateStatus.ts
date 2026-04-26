@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { TemplateManager } from "../../services/templateManager.js";
+import type { IdParam } from "../../types/request.js";
 
-export default function changeTemplateStatus(req: Request<{ id: number}, {}, { status: "start" | "stop" }>, res: Response) {
+export default function changeTemplateStatus(req: Request<IdParam, {}, { status: "start" | "stop" }>, res: Response) {
 	const templateId = Number(req.params.id);
 
 	const templateManager = TemplateManager.getInstance();

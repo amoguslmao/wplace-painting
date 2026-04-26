@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import type { JoinAlliance } from "../../../types/request.js";
+import type { IdParam, JoinAlliance } from "../../../types/request.js";
 import { AccountManager } from "../../../services/accountManager.js";
 
-export default async function joinAlliance(req: Request<{ id: string }, {}, JoinAlliance>, res: Response) {
+export default async function joinAlliance(req: Request<IdParam, {}, JoinAlliance>, res: Response) {
 	if (!req.body || !req.body.allianceUUID) {
 		return res.status(400).json({
 			message: `Field "allianceUUID" is required.`

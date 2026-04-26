@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import { AccountManager } from "../../../services/accountManager.js";
-import type { RenameUser } from "../../../types/request.js";
+import type { IdParam, RenameUser } from "../../../types/request.js";
 
-export default async function renameUser(req: Request<{ id: string }, {}, RenameUser>, res: Response) {
+export default async function renameUser(req: Request<IdParam, {}, RenameUser>, res: Response) {
 	const accountId = Number(req.params.id);
 
 	const accountManager = AccountManager.getInstance();
