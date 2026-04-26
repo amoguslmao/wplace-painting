@@ -28,7 +28,8 @@ export const FLAG_ITEM = {
 
 export const DEFAULT_APP_SETTINGS: SettingFields = {
 	bulkOperationCooldown: 5000,
-	paintMethod: "linear"
+	paintMethod: "linear",
+	accountTurnCoolDown: 5000
 }
 
 export const WPLACE_PALLETE: Record<number, ColorInformation> = {
