@@ -39,3 +39,10 @@ export const TemplateInformationSchema = z.object({
 	coordinates: TemplateCoordinatesSchema,
 	setting: TemplateSettingSchema,
 });
+
+export const UpdateTemplateSchema = z.object({
+	name: z.string().min(1),
+	assignedAccounts: z.array(z.number().int().nonnegative()),
+	coordinates: TemplateCoordinatesSchema,
+	setting: TemplateSettingSchema
+});
