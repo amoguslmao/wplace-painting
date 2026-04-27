@@ -21,6 +21,14 @@ export class AppSetting {
 		return this._settings;
 	}
 
+	public set settings(value: SettingFields) {
+		if (!this.initialized) {
+			throw new Error("Instance did not created correctly.");
+		}
+
+		this._settings = value;
+	} 
+
 	public static getInstance() {
 		if (!this._instance) {
 			this._instance = new AppSetting();
