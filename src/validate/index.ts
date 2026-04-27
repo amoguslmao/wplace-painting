@@ -46,3 +46,9 @@ export const UpdateTemplateSchema = z.object({
 	coordinates: TemplateCoordinatesSchema,
 	setting: TemplateSettingSchema
 });
+
+export const AppSettingSchema = z.object({
+	bulkOperationCooldown: z.number().int().nonnegative(),
+	paintMethod: z.string(),
+	accountTurnCooldown: z.number().int().nonnegative()
+});
