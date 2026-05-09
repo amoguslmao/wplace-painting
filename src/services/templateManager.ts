@@ -149,6 +149,8 @@ export class TemplateManager {
 
 		const templateProcess = fork(`./dist/workers/paintTemplate.mjs`);
 
+		template.event = templateProcess;
+
 		templateProcess.on("message", (message) => {
 			console.log(message);
 		});
@@ -186,6 +188,8 @@ export class TemplateManager {
 		}
 
 		templateProcess.kill();
+
+		template.event = null;
 
 		console.log(`Stopped template ${template.name}#${template.id}`);
 
