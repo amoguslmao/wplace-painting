@@ -1,3 +1,4 @@
+import type EventEmitter from "node:events";
 import { DatabaseInstance } from "../services/database.js";
 import type { 
 	TemplateDatabase, 
@@ -10,19 +11,22 @@ export class Template {
 	public readonly id: number;
 	public createdAt: string;
 	public imageName: string;
+	public event: EventEmitter | null;
 
 	private _name: string;
-
 	private _imageInformation: string;
 	private _assignedAccounts: string;
 	private _coordinates: string;
 	private _setting: string;
+	
 
 	public constructor(data: TemplateDatabase) {
 		this.id = data.id;
 		this.createdAt = data.createdAt;
 		this.imageName = data.imageName;
 		
+		this.event = null;
+
 		this._name = data.name;
 		this._assignedAccounts = data.assignedAccounts;
 		this._coordinates = data.coordinates;
@@ -125,5 +129,19 @@ export class Template {
 
 	public get imageInformation(): TemplateImageInformation {
 		return JSON.parse(this._imageInformation);
+	}
+
+	public getStatus() {
+		return new Promise((resolve, reject) => {
+			if (!this.event) {
+				reject(new Error("Template didnt started before to use this method."));
+				return;
+			}
+
+			// làm đại đại chứ chưa biết như nào
+			this.event.once("get_status", (result: any) => {
+				resolve(result);
+			});
+		});
 	}
 }
