@@ -1,5 +1,6 @@
-import sharp, { type Sharp, type Metadata, type SharpInput, type Region } from "sharp";
+import sharp, { type Sharp, type Metadata, type SharpInput, type Region, type OverlayOptions } from "sharp";
 import type { RGBArray } from "../types/color.js";
+import { TILE_SIZE } from "../const/index.js";
 
 export class ImageManiputation {
 	public loaded = false;
@@ -117,4 +118,51 @@ export class ImageManiputation {
 			data[index + 2],
 		];
 	}
+}
+
+export async function merge2dImages(grid: ImageManiputation[][]) {
+	if (!grid.length || !grid[0].length) {
+		throw new Error("A grid could not be empty");
+	}
+
+	const rows = grid.length;
+	const cols = grid[0].length;
+	const compositeOperations: OverlayOptions[] = [];
+
+	for (let row = 0; row < rows; row++) {
+		for (let col = 0; col < cols; col++) {
+			const instance = grid[row][col];
+
+			const { width, height } = instance.metadata;
+
+			if (width > TILE_SIZE || height > TILE_SIZE) {
+				throw new Error(`Image at row ${row}, col ${col} have a invalid size (maxium ${TILE_SIZE} but got ${width}x${height})`);
+			}
+
+			compositeOperations.push({
+				input: instance.toBuffer(),
+				top: row * TILE_SIZE,
+				left: col * TILE_SIZE
+			});
+		}
+	}
+
+	const finalWidth = cols * TILE_SIZE;
+	const finalHeight = rows * TILE_SIZE;
+
+	const combinedImage = await sharp({
+		create: {
+			width: finalWidth,
+			height: finalHeight,
+			channels: 4,
+			background: {
+				r: 0, g: 0, b: 0, alpha: 0
+			}
+		}
+	})
+	.composite(compositeOperations)
+	.png()
+	.toBuffer()
+
+	return await ImageManiputation.create(combinedImage);
 }
