@@ -24,14 +24,14 @@ export default function changeTemplateStatus(req: Request<IdParam, {}, { status:
 	try {
 		switch (req.body.status) {
 			case "start": {
-				const result = templateManager.startTemplate(template.id);
+				const result = template.start();
 
 				return res.status(result.status === "success" ? 200 : 400).json({
 					message: result.message
 				});
 			}
 			case "stop": {
-				const result = templateManager.stopTemplate(template.id);
+				const result = template.stop();
 
 				return res.status(result.status === "success" ? 200 : 400).json({
 					message: result.message
