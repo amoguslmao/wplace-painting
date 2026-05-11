@@ -1,4 +1,3 @@
-import type EventEmitter from "node:events";
 import { DatabaseInstance } from "../services/database.js";
 import type { 
 	TemplateDatabase, 
@@ -6,12 +5,19 @@ import type {
 	TemplateSetting, 
 	TemplateImageInformation 
 } from "../types/template.js";
+import type { ChildProcessMessage, MainProcessEvents, MainProcessMessage } from "../types/event.js";
+import { sendMessage } from "../utils/process.js";
+import { fork, type ChildProcess } from "node:child_process";
+import EventEmitter from "node:events";
+import type { OperationResult } from "../types/utils.js";
 
 export class Template {
 	public readonly id: number;
 	public createdAt: string;
 	public imageName: string;
-	public event: EventEmitter | null;
+
+	private process: ChildProcess | null;
+	private event: EventEmitter<MainProcessEvents> | null;
 
 	private _name: string;
 	private _imageInformation: string;
@@ -25,6 +31,7 @@ export class Template {
 		this.createdAt = data.createdAt;
 		this.imageName = data.imageName;
 		
+		this.process = null;
 		this.event = null;
 
 		this._name = data.name;
@@ -129,6 +136,91 @@ export class Template {
 
 	public get imageInformation(): TemplateImageInformation {
 		return JSON.parse(this._imageInformation);
+	}
+
+	public start(): OperationResult {
+		if (this.process || this.event) {
+			return {
+				message: `Template ${this.name} has been started before`,
+				status: "failed"
+			}
+		}
+
+		this.process = fork("./dist/workers/paintTemplate.mjs");
+		this.event = new EventEmitter<MainProcessEvents>();
+
+		this.process.on("message", (message: MainProcessMessage) => {
+			if (!this.event) {
+				throw new Error("Property 'event' must be not null when template is running");
+			}
+
+			switch (message.op) {
+				case "response_status": {
+					this.event.emit("response_status", message.data.painted, message.sequence);
+					break;
+				}
+				case "response_info": {
+					this.event.emit("response_info", message.data.memory, message.sequence);
+					break;
+				}
+				default: {
+					console.error("Unknown message op received from child");
+				}
+			}
+		});
+
+		this.process.on("exit", (code) => {
+			console.error(`Process exited with code ${code}`);
+		})
+
+		sendMessage<ChildProcessMessage>(this.process, {
+			op: "init_process",
+			data: { 
+				template: 
+				{
+					id: this.id,
+					name: this.name,
+					createdAt: this.createdAt,
+					imageName: this.imageName,
+
+					imageInformation: this.imageInformation,
+					assignedAccounts: this.assignedAccounts,
+					coordinates: this.coordinates,
+					setting: this.setting
+				} 
+			}
+		})
+
+		return {
+			message: `Started template ${this.name}`,
+			status: "success"
+		}
+	}
+
+	public stop(): OperationResult {
+		if (!this.process || !this.event) {
+			return {
+				message: `Template ${this.name} has not started before`,
+				status: "failed"
+			}
+		}
+
+		this.process.removeAllListeners();
+		this.event.removeAllListeners();
+
+		this.process.kill();
+
+		this.process = null;
+		this.event = null;
+
+		return {
+			message: `Stopped template ${this.name}`,
+			status: "success"
+		}
+	}
+
+	public isRunning(): boolean {
+		return this.process !== null;
 	}
 
 	public getStatus() {
