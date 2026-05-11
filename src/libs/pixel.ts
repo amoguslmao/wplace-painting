@@ -1,8 +1,8 @@
 import EnvConfig from "../config.js";
 import { TILE_SIZE } from "../const/index.js";
-import type { GlobalPixel, PaintingTile, Pixel, PixelInformation } from "../types/pixel.js";
+import type { GlobalPixel, Pixel, PixelInformation } from "../types/pixel.js";
 import type { TemplateCoordinates } from "../types/template.js";
-import { matchingPallete } from "./color.js";
+import { arrayEquals, matchingPallete } from "./color.js";
 import { ImageManiputation } from "./imageManiputation.js";
 
 export function toPixel(coordinates: TemplateCoordinates): Pixel {
@@ -126,7 +126,10 @@ export class PaintingMethod {
 
 				if (
 					colorId &&
-					this.imageFromTiles.getPixel(x, y) === this.originImage.getPixel(x, y)
+					!arrayEquals(
+						this.imageFromTiles.getPixel(x, y),
+						this.originImage.getPixel(x, y)
+					)
 				) {
 					result.push({
 						x, y,
