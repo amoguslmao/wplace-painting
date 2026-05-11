@@ -1,13 +1,14 @@
 import EventEmitter from "node:events";
-import { type ChildEvent, type EventBody } from "../types/event.js";
-import type { Template } from "./../base/template.js";
+import type { ChildProcessEvents, ChildProcessMessage, MainProcessMessage } from "../types/event.js";
 import { AccountManager } from "./../services/accountManager.js";
 import { DatabaseInstance } from "./../services/database.js";
 import { sleep } from "../utils/promises.js";
 import { calculateLastPixel, getTile, localToGlobalPixel, PaintingMethod, toGlobalPixel, toPixel, toTilePixel } from "../libs/pixel.js";
 import { ImageManiputation, merge2dImages } from "../libs/imageManiputation.js";
-import { DATABASE_NAME, UPLOADS_FOLDER } from "../const/index.js";
+import { DATA_FOLDER, UPLOADS_FOLDER } from "../const/index.js";
 import type { PaintingTile } from "../types/pixel.js";
+import { sendMessage } from "../utils/process.js";
+import type { TemplateInformation } from "../types/template.js";
 
 /////////////////////////////
 // Initilize
@@ -24,22 +25,62 @@ console.log(`[Child Process] account manager initilized`);
 /////////////////////////////
 // Const
 /////////////////////////////
-const state: { template: Template | null, painted: number } = {
+const state: { template: TemplateInformation | null, painted: number } = {
 	template: null,
 	painted: 0
 }
-const event = new EventEmitter<ChildEvent>();
+const event = new EventEmitter<ChildProcessEvents>();
 
 /////////////////////////////
 // Event
 /////////////////////////////
-process.on("message", (message: EventBody) => {
+process.on("message", (message: ChildProcessMessage) => {
 	switch (message.op) {
 		case "init_process": {
-			state.template = message.data as unknown as any; // Override type tạm thời, sẽ fix sau
+			state.template = message.data.template;
+			console.log(`Received template ${state.template.name} from main`);
+			break;
+		}
+		case "get_status": {
+			event.emit("get_status", message.sequence);
+			break;
+		}
+		case "get_info": {
+			event.emit("get_info", message.sequence);
+			break;
+		}
+		default: {
+			console.error(`Unknown message op received from main`);
 		}
 	}
-})
+});
+
+event.on("get_info", (sequence) => {
+	const memoryUsage = process.memoryUsage();
+
+	sendMessage<MainProcessMessage>(process, {
+		op: "response_info",
+		data: {
+			memory: {
+				heapUsed: memoryUsage.heapUsed / 1024 / 1024,
+				heapTotal: memoryUsage.heapTotal / 1024 / 1024,
+				rss: memoryUsage.rss / 1024 / 1024,
+				external: memoryUsage.external / 1024 / 1024,
+			}
+		},
+		sequence
+	})
+});
+
+event.on("get_status", (sequence) => {
+	sendMessage<MainProcessMessage>(process, {
+		op: "response_status",
+		data: {
+			painted: state.painted
+		},
+		sequence
+	});
+});
 
 /////////////////////////////
 // Main part
@@ -60,22 +101,29 @@ while (true) {
 		template.imageInformation.width
 	);
 
-	const originImage = await ImageManiputation.create(`./${DATABASE_NAME}/${UPLOADS_FOLDER}/${template.imageName}`);
+	const originImage = await ImageManiputation.create(`./${DATA_FOLDER}/${UPLOADS_FOLDER}/${template.imageName}`);
 	const requiredTiles: ImageManiputation[][] = new Array().fill([]);
 
 	for (let tileY = firstPixel.tile.y; tileY <= lastPixel.tile.y; tileY++) {
 		const rowIndex = tileY - firstPixel.tile.y;
+
+		requiredTiles[rowIndex] = [];
 
 		for (let tileX = firstPixel.tile.x; tileX <= lastPixel.tile.x; tileX++) {
 			requiredTiles[rowIndex].push(await getTile(tileX, tileY));
 		}
 	}
 
+	console.debug(`Required tiles:`, requiredTiles);
+
 	const tiles = await Promise.all(requiredTiles);
 
 	const finalImage = await merge2dImages(tiles);
 
-	await finalImage.crop({
+	console.log(`First pixel in template:`, firstPixel);
+	console.log(`Width and height from template: ${template.imageInformation.width}x${template.imageInformation.height}`);
+
+	const mergedTileImage = await finalImage.crop({
 		left: firstPixel.x,
 		top: firstPixel.y,
 		width: template.imageInformation.width,
@@ -83,9 +131,11 @@ while (true) {
 	}).flush();
 
 	// Cần chỉ định acc nào có cái charge bao nhiêu rồi bỏ vào param thứ 3
-	const paintMethod = new PaintingMethod(finalImage, originImage, 10);
+	const paintMethod = new PaintingMethod(mergedTileImage, originImage, 10);
 
 	const totalPixels = paintMethod.linear();
+
+	console.debug(`Total pixel painted:`, totalPixels);
 
 	const tileMap = new Map<string, PaintingTile>();
 
@@ -116,6 +166,14 @@ while (true) {
 	}
 
 	const paintingTiles = Array.from(tileMap.values());
+
+	console.log(`Painting Tile:`);
+	console.log(paintingTiles);
+	console.log(`Pixels:`);
+	console.log(paintingTiles[0].pixels);
+
+
+	await sleep(5000);
 
 	// Tiếp theo là phần paint, nhưng mà chưa chỉ định acc nào nên chịu.
 }
