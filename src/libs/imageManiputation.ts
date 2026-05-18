@@ -1,5 +1,5 @@
 import sharp, { type Sharp, type Metadata, type SharpInput, type Region, type OverlayOptions } from "sharp";
-import type { RGBArray } from "../types/color.js";
+import type { RGBA } from "../types/color.js";
 import { TILE_SIZE } from "../const/index.js";
 
 export class ImageManiputation {
@@ -98,7 +98,7 @@ export class ImageManiputation {
 		return _raw;
 	}
 
-	public getPixel(x: number, y: number): RGBArray {
+	public getPixel(x: number, y: number): RGBA {
 		const { metadata } = this;
 		const { height, width } = metadata;
 
@@ -116,6 +116,7 @@ export class ImageManiputation {
 			data[index],
 			data[index + 1],
 			data[index + 2],
+			data[index + 3]
 		];
 	}
 }
