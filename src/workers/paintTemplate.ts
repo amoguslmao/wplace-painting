@@ -9,18 +9,31 @@ import { DATA_FOLDER, UPLOADS_FOLDER } from "../const/index.js";
 import type { PaintingTile } from "../types/pixel.js";
 import { sendMessage } from "../utils/process.js";
 import type { TemplateInformation } from "../types/template.js";
+import { AccountQueue } from "../libs/queue.js";
+import { AppSetting } from "../services/settings.js";
+import { Logger } from "../libs/logger.js";
 
 /////////////////////////////
 // Initilize
 /////////////////////////////
-console.log(`[Child Process] Child process started`);
+const logger = new Logger(["Child Process"]);
 
-DatabaseInstance.getInstance();
-console.log(`[Child Process] Database started`);
+const servicesLogger = logger.getLogger("service");
+const templateLogger = logger.getLogger("template");
+
+logger.info(`Child process started`);
+
+const database = DatabaseInstance.getInstance();
+servicesLogger.success(`Database started`);
 
 const accountManager = AccountManager.getInstance();
 await accountManager.init();
-console.log(`[Child Process] account manager initilized`);
+servicesLogger.success(`Account Manager initilized`);
+
+const appSetting = AppSetting.getInstance();
+
+await appSetting.loadSetting();
+servicesLogger.success(`App setting is loaded`);
 
 /////////////////////////////
 // Const
@@ -38,7 +51,7 @@ process.on("message", (message: ChildProcessMessage) => {
 	switch (message.op) {
 		case "init_process": {
 			state.template = message.data.template;
-			console.log(`Received template ${state.template.name} from main`);
+			logger.info(`Received template ${state.template.name} from main`);
 			break;
 		}
 		case "get_status": {
@@ -92,6 +105,8 @@ while (true) {
 	}
 	
 	const { template } = state;
+	const queue = new AccountQueue(template.assignedAccounts);
+	const accountPredictedCharge = await queue.getFirstRefillingAccount();
 
 	const firstPixel = toPixel(template.coordinates);
 	const globalFirstPixel = toGlobalPixel(firstPixel);
@@ -114,14 +129,9 @@ while (true) {
 		}
 	}
 
-	console.debug(`Required tiles:`, requiredTiles);
-
 	const tiles = await Promise.all(requiredTiles);
 
 	const finalImage = await merge2dImages(tiles);
-
-	console.log(`First pixel in template:`, firstPixel);
-	console.log(`Width and height from template: ${template.imageInformation.width}x${template.imageInformation.height}`);
 
 	const mergedTileImage = await finalImage.crop({
 		left: firstPixel.x,
@@ -130,12 +140,9 @@ while (true) {
 		height: template.imageInformation.height
 	}).flush();
 
-	// Cần chỉ định acc nào có cái charge bao nhiêu rồi bỏ vào param thứ 3
-	const paintMethod = new PaintingMethod(mergedTileImage, originImage, 10);
+	const paintMethod = new PaintingMethod(mergedTileImage, originImage, accountPredictedCharge.predictedCharges);
 
 	const totalPixels = paintMethod.linear();
-
-	console.debug(`Total pixel painted:`, totalPixels);
 
 	const tileMap = new Map<string, PaintingTile>();
 
@@ -167,13 +174,30 @@ while (true) {
 
 	const paintingTiles = Array.from(tileMap.values());
 
-	console.log(`Painting Tile:`);
-	console.log(paintingTiles);
-	console.log(`Pixels:`);
-	console.log(paintingTiles[0].pixels);
+	if (paintingTiles.length === 0) {
+		templateLogger.success("Template is done.");
 
+		break;
+	}
 
-	await sleep(5000);
+	const account = accountManager.accounts.get(accountPredictedCharge.id)!;
 
-	// Tiếp theo là phần paint, nhưng mà chưa chỉ định acc nào nên chịu.
+	await account.paint(paintingTiles);
+
+	templateLogger.success(`Painted successfully. (or ig)`);
+
+	if (accountPredictedCharge.predictedCharges >= totalPixels.length) {
+		templateLogger.info(`That is the last paint of this template.`);
+		templateLogger.success(`Template is done.`);
+
+		break;
+	}
+
+	await sleep(appSetting.settings.accountTurnCooldown);
 }
+
+logger.info(`Exiting process...`);
+
+database.close();
+
+process.exit(0);
