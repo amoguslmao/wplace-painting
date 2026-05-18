@@ -50,5 +50,6 @@ export const UpdateTemplateSchema = z.object({
 export const AppSettingSchema = z.object({
 	bulkOperationCooldown: z.number().int().nonnegative(),
 	paintMethod: z.string(),
-	accountTurnCooldown: z.number().int().nonnegative()
+	accountTurnCooldown: z.number().int().nonnegative(),
+	chargeThreshold: z.number().int().nonnegative().min(0).max(100)
 });

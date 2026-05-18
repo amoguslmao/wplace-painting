@@ -29,7 +29,8 @@ export const FLAG_ITEM = {
 export const DEFAULT_APP_SETTINGS: SettingFields = {
 	bulkOperationCooldown: 5000,
 	paintMethod: "linear",
-	accountTurnCooldown: 5000
+	accountTurnCooldown: 5000,
+	chargeThreshold: 90
 }
 
 export const WPLACE_PALLETE: Record<number, ColorInformation> = {
