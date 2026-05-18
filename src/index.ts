@@ -9,10 +9,16 @@ import { DatabaseInstance } from "./services/database.js";
 import { AccountManager } from "./services/accountManager.js";
 import { TemplateManager } from "./services/templateManager.js";
 import { AppSetting } from "./services/settings.js";
+import { Logger } from "./libs/logger.js";
+
+const logger = new Logger();
+
+const servicesLogger = logger.getLogger("service");
+const apiLogger = logger.getLogger("API");
 
 // Database
 const db = DatabaseInstance.getInstance();
-console.log(`Database started`);
+servicesLogger.success("Database started");
 
 process.on("SIGINT", () => exit(db));
 process.on("SIGKILL", () => exit(db));
@@ -26,21 +32,21 @@ const appSetting = AppSetting.getInstance();
 
 await appSetting.loadSetting();
 
-console.log(`App Setting is loaded`);
+servicesLogger.success(`App Setting is loaded`);
 
 // Accounts
 const accountManager = AccountManager.getInstance();
 
 await accountManager.init();
 
-console.log(`Account Manager is initilized`);
+servicesLogger.success("Account Manager is initilized");
 
 // Templates
 const templateManager = TemplateManager.getInstance();
 
 templateManager.init();
 
-console.log(`Template Manager is initilized`);
+servicesLogger.success("Template Manager is initilized");
 
 // API
 const app = express();
@@ -52,10 +58,10 @@ app.use("/api", routers);
 
 app.listen(EnvConfig.port, EnvConfig.host, (err) => {
 	if (err) {
-		console.error("Error occured when making Express Instance", err);
+		apiLogger.error("Error occured when making Express Instance", err);
 
 		process.exit(1);
 	}
 
-	console.log(`API running on ${EnvConfig.host}:${EnvConfig.port}`);
+	apiLogger.success(`API running on ${EnvConfig.host}:${EnvConfig.port}`);
 });

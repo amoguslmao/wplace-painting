@@ -1,10 +1,13 @@
 import type { ChildProcess, Serializable } from "node:child_process";
 import type { DatabaseInstance } from "../services/database.js";
+import { Logger } from "../libs/logger.js";
 
 export function exit(db: DatabaseInstance) {
+	const logger = new Logger(["service"]);
+
 	db.close();
 
-	console.log(`Database closed`);
+	logger.info(`Database closed`);
 
 	process.exit(0);
 }
