@@ -1,5 +1,8 @@
+import type { ChalkInstance } from "chalk";
 import type { ColorInformation } from "../types/color.js";
 import type { SettingFields } from "../types/settings.js";
+import type { LogLevel } from "../types/utils.js";
+import chalk from "chalk";
 
 export const TILE_SIZE = 1000 as const;
 
@@ -33,73 +36,103 @@ export const DEFAULT_APP_SETTINGS: SettingFields = {
 	chargeThreshold: 90
 }
 
-export const WPLACE_PALLETE: Record<number, ColorInformation> = {
-	0: { name: "Transparent", rgb: [0, 0, 0], premium: false },
-	1: { name: "Black", rgb: [0, 0, 0], premium: false },
-	2: { name: "Dark Gray", rgb: [60, 60, 60], premium: false },
-	3: { name: "Gray", rgb: [120, 120, 120], premium: false },
-	4: { name: "Light Gray", rgb: [210, 210, 210], premium: false },
-	5: { name: "White", rgb: [255, 255, 255], premium: false },
-	6: { name: "Deep Red", rgb: [96, 0, 24], premium: false },
-	7: { name: "Red", rgb: [237, 28, 36], premium: false },
-	8: { name: "Orange", rgb: [255, 127, 39], premium: false },
-	9: { name: "Gold", rgb: [246, 170, 9], premium: false },
-	10: { name: "Yellow", rgb: [249, 221, 59], premium: false },
-	11: { name: "Light Yellow", rgb: [255, 250, 188], premium: false },
-	12: { name: "Dark Green", rgb: [14, 185, 104], premium: false },
-	13: { name: "Green", rgb: [19, 230, 123], premium: false },
-	14: { name: "Light Green", rgb: [135, 255, 94], premium: false },
-	15: { name: "Dark Teal", rgb: [12, 129, 110], premium: false },
-	16: { name: "Teal", rgb: [16, 174, 166], premium: false },
-	17: { name: "Light Teal", rgb: [19, 225, 190], premium: false },
-	18: { name: "Dark Blue", rgb: [40, 80, 158], premium: false },
-	19: { name: "Blue", rgb: [64, 147, 228], premium: false },
-	20: { name: "Cyan", rgb: [96, 247, 242], premium: false },
-	21: { name: "Indigo", rgb: [107, 80, 246], premium: false },
-	22: { name: "Light Indigo", rgb: [153, 177, 251], premium: false },
-	23: { name: "Dark Purple", rgb: [120, 12, 153], premium: false },
-	24: { name: "Purple", rgb: [170, 56, 185], premium: false },
-	25: { name: "Light Purple", rgb: [224, 159, 249], premium: false },
-	26: { name: "Dark Pink", rgb: [203, 0, 122], premium: false },
-	27: { name: "Pink", rgb: [236, 31, 128], premium: false },
-	28: { name: "Light Pink", rgb: [243, 141, 169], premium: false },
-	29: { name: "Dark Brown", rgb: [104, 70, 52], premium: false },
-	30: { name: "Brown", rgb: [149, 104, 42], premium: false },
-	31: { name: "Beige", rgb: [248, 178, 119], premium: false },
-	32: { name: "Medium Gray", rgb: [170, 170, 170], premium: true },
-	33: { name: "Dark Red", rgb: [165, 14, 30], premium: true },
-	34: { name: "Light Red", rgb: [250, 128, 114], premium: true },
-	35: { name: "Dark Orange", rgb: [228, 92, 26], premium: true },
-	36: { name: "Light Tan", rgb: [214, 181, 148], premium: true },
-	37: { name: "Dark Goldenrod", rgb: [156, 132, 49], premium: true },
-	38: { name: "Goldenrod", rgb: [197, 173, 49], premium: true },
-	39: { name: "Light Goldenrod", rgb: [232, 212, 95], premium: true },
-	40: { name: "Dark Olive", rgb: [74, 107, 58], premium: true },
-	41: { name: "Olive", rgb: [90, 148, 74], premium: true },
-	42: { name: "Light Olive", rgb: [132, 197, 115], premium: true },
-	43: { name: "Dark Cyan", rgb: [15, 121, 159], premium: true },
-	44: { name: "Light Cyan", rgb: [187, 250, 242], premium: true },
-	45: { name: "Light Blue", rgb: [125, 199, 255], premium: true },
-	46: { name: "Dark Indigo", rgb: [77, 49, 184], premium: true },
-	47: { name: "Dark Slate Blue", rgb: [74, 66, 132], premium: true },
-	48: { name: "Slate Blue", rgb: [122, 113, 196], premium: true },
-	49: { name: "Light Slate Blue", rgb: [181, 174, 241], premium: true },
-	50: { name: "Light Brown", rgb: [219, 164, 99], premium: true },
-	51: { name: "Dark Beige", rgb: [209, 128, 81], premium: true },
-	52: { name: "Light Beige", rgb: [255, 197, 165], premium: true },
-	53: { name: "Dark Peach", rgb: [155, 82, 73], premium: true },
-	54: { name: "Peach", rgb: [209, 128, 120], premium: true },
-	55: { name: "Light Peach", rgb: [250, 182, 164], premium: true },
-	56: { name: "Dark Tan", rgb: [123, 99, 82], premium: true },
-	57: { name: "Tan", rgb: [156, 132, 107], premium: true },
-	58: { name: "Dark Slate", rgb: [51, 57, 65], premium: true },
-	59: { name: "Slate", rgb: [109, 117, 141], premium: true },
-	60: { name: "Light Slate", rgb: [179, 185, 209], premium: true },
-	61: { name: "Dark Stone", rgb: [109, 100, 63], premium: true },
-	62: { name: "Stone", rgb: [148, 140, 107], premium: true },
-	63: { name: "Light Stone", rgb: [205, 197, 158], premium: true }
-};
+export const LOG_LEVEL_STYLES: Record<
+	LogLevel, 
+	{ color: ChalkInstance, icon: string }
+> = {
+	error: {
+		color: chalk.red,
+		icon: "✖"
+	},
+	warn: {
+		color: chalk.hex("#FFA500"),
+		icon: "⚠"
+	},
+	success: {
+		color: chalk.green,
+		icon: "✔"
+	},
+	info: {
+		color: chalk.white,
+		icon: "ℹ"
+	},
+	log: {
+		color: chalk.gray,
+		icon: "○"
+	},
+	debug: {
+		color: chalk.yellow,
+		icon: "⚙"
+	}
+}
 
+
+export const WPLACE_PALLETE: Record<number, ColorInformation> = {
+	0: { name: "Transparent", rgba: [0, 0, 0, 0], premium: false },
+	1: { name: "Black", rgba: [0, 0, 0, 255], premium: false },
+	2: { name: "Dark Gray", rgba: [60, 60, 60, 255], premium: false },
+	3: { name: "Gray", rgba: [120, 120, 120, 255], premium: false },
+	4: { name: "Light Gray", rgba: [210, 210, 210, 255], premium: false },
+	5: { name: "White", rgba: [255, 255, 255, 255], premium: false },
+	6: { name: "Deep Red", rgba: [96, 0, 24, 255], premium: false },
+	7: { name: "Red", rgba: [237, 28, 36, 255], premium: false },
+	8: { name: "Orange", rgba: [255, 127, 39, 255], premium: false },
+	9: { name: "Gold", rgba: [246, 170, 9, 255], premium: false },
+	10: { name: "Yellow", rgba: [249, 221, 59, 255], premium: false },
+	11: { name: "Light Yellow", rgba: [255, 250, 188, 255], premium: false },
+	12: { name: "Dark Green", rgba: [14, 185, 104, 255], premium: false },
+	13: { name: "Green", rgba: [19, 230, 123, 255], premium: false },
+	14: { name: "Light Green", rgba: [135, 255, 94, 255], premium: false },
+	15: { name: "Dark Teal", rgba: [12, 129, 110, 255], premium: false },
+	16: { name: "Teal", rgba: [16, 174, 166, 255], premium: false },
+	17: { name: "Light Teal", rgba: [19, 225, 190, 255], premium: false },
+	18: { name: "Dark Blue", rgba: [40, 80, 158, 255], premium: false },
+	19: { name: "Blue", rgba: [64, 147, 228, 255], premium: false },
+	20: { name: "Cyan", rgba: [96, 247, 242, 255], premium: false },
+	21: { name: "Indigo", rgba: [107, 80, 246, 255], premium: false },
+	22: { name: "Light Indigo", rgba: [153, 177, 251, 255], premium: false },
+	23: { name: "Dark Purple", rgba: [120, 12, 153, 255], premium: false },
+	24: { name: "Purple", rgba: [170, 56, 185, 255], premium: false },
+	25: { name: "Light Purple", rgba: [224, 159, 249, 255], premium: false },
+	26: { name: "Dark Pink", rgba: [203, 0, 122, 255], premium: false },
+	27: { name: "Pink", rgba: [236, 31, 128, 255], premium: false },
+	28: { name: "Light Pink", rgba: [243, 141, 169, 255], premium: false },
+	29: { name: "Dark Brown", rgba: [104, 70, 52, 255], premium: false },
+	30: { name: "Brown", rgba: [149, 104, 42, 255], premium: false },
+	31: { name: "Beige", rgba: [248, 178, 119, 255], premium: false },
+	32: { name: "Medium Gray", rgba: [170, 170, 170, 255], premium: true },
+	33: { name: "Dark Red", rgba: [165, 14, 30, 255], premium: true },
+	34: { name: "Light Red", rgba: [250, 128, 114, 255], premium: true },
+	35: { name: "Dark Orange", rgba: [228, 92, 26, 255], premium: true },
+	36: { name: "Light Tan", rgba: [214, 181, 148, 255], premium: true },
+	37: { name: "Dark Goldenrod", rgba: [156, 132, 49, 255], premium: true },
+	38: { name: "Goldenrod", rgba: [197, 173, 49, 255], premium: true },
+	39: { name: "Light Goldenrod", rgba: [232, 212, 95, 255], premium: true },
+	40: { name: "Dark Olive", rgba: [74, 107, 58, 255], premium: true },
+	41: { name: "Olive", rgba: [90, 148, 74, 255], premium: true },
+	42: { name: "Light Olive", rgba: [132, 197, 115, 255], premium: true },
+	43: { name: "Dark Cyan", rgba: [15, 121, 159, 255], premium: true },
+	44: { name: "Light Cyan", rgba: [187, 250, 242, 255], premium: true },
+	45: { name: "Light Blue", rgba: [125, 199, 255, 255], premium: true },
+	46: { name: "Dark Indigo", rgba: [77, 49, 184, 255], premium: true },
+	47: { name: "Dark Slate Blue", rgba: [74, 66, 132, 255], premium: true },
+	48: { name: "Slate Blue", rgba: [122, 113, 196, 255], premium: true },
+	49: { name: "Light Slate Blue", rgba: [181, 174, 241, 255], premium: true },
+	50: { name: "Light Brown", rgba: [219, 164, 99, 255], premium: true },
+	51: { name: "Dark Beige", rgba: [209, 128, 81, 255], premium: true },
+	52: { name: "Light Beige", rgba: [255, 197, 165, 255], premium: true },
+	53: { name: "Dark Peach", rgba: [155, 82, 73, 255], premium: true },
+	54: { name: "Peach", rgba: [209, 128, 120, 255], premium: true },
+	55: { name: "Light Peach", rgba: [250, 182, 164, 255], premium: true },
+	56: { name: "Dark Tan", rgba: [123, 99, 82, 255], premium: true },
+	57: { name: "Tan", rgba: [156, 132, 107, 255], premium: true },
+	58: { name: "Dark Slate", rgba: [51, 57, 65, 255], premium: true },
+	59: { name: "Slate", rgba: [109, 117, 141, 255], premium: true },
+	60: { name: "Light Slate", rgba: [179, 185, 209, 255], premium: true },
+	61: { name: "Dark Stone", rgba: [109, 100, 63, 255], premium: true },
+	62: { name: "Stone", rgba: [148, 140, 107, 255], premium: true },
+	63: { name: "Light Stone", rgba: [205, 197, 158, 255], premium: true }
+};
 export const WPLACE_FLAGS = {
 	1: { name: "Afghanistan", code: "AF", flag: "🇦🇫" },
 	2: { name: "Albania", code: "AL", flag: "🇦🇱" },
