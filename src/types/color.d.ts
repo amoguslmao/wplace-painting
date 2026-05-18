@@ -1,7 +1,7 @@
-export type RGBArray = [r: number, g: number, b: number];
+export type RGBA = [r: number, g: number, b: number, a: number];
 
 export type ColorInformation = {
 	name: string,
-	rgb: RGBArray,
+	rgba: RGBA,
 	premium: boolean
 }
