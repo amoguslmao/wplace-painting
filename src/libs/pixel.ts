@@ -20,7 +20,7 @@ export function toGlobalPixel(pixel: Pixel): Omit<Pixel, "tile"> {
 	return {
 		x: pixel.x + pixel.tile.x * TILE_SIZE,
 		y: pixel.y + pixel.tile.y * TILE_SIZE
-	};
+	}
 }
 
 export function toTilePixel(globalPixel: GlobalPixel): Pixel {
@@ -104,7 +104,7 @@ export async function getTile(tileX: number, tileY: number): Promise<ImageManipu
 		}
 	});
 
-	const image = ImageManiputation.create(await response.arrayBuffer());
+	const image = await ImageManiputation.create(await response.arrayBuffer());
 
 	return image;
 }
