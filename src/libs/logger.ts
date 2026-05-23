@@ -13,10 +13,6 @@ export class Logger {
 		return new Logger([...this.namespace, namespace]);
 	}
 
-	public log(...args: any[]) {
-		this.write("log", ...args);
-	}
-
 	public error(...args: any[]) {
 		this.write("error", ...args);
 	}
@@ -45,7 +41,6 @@ export class Logger {
 		const prefix = [chalk.gray(time), color(icon), color(namespaces)]
 			.filter(Boolean)
 			.join(" ");
-
 		
 		console.log(prefix, ...args);
 	}

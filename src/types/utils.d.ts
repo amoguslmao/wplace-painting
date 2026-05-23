@@ -4,6 +4,6 @@ export interface OperationResult<Data = void> {
 	data?: Data
 }
 
-export type LogLevel = "error" | "warn" | "success" | "info" | "log" | "debug";
+export type LogLevel = "error" | "warn" | "success" | "info" | "debug";
 
 export type EventStreamType = "success" | "failed" | "error";

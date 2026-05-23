@@ -56,10 +56,6 @@ export const LOG_LEVEL_STYLES: Record<
 		color: chalk.white,
 		icon: "ℹ"
 	},
-	log: {
-		color: chalk.gray,
-		icon: "○"
-	},
 	debug: {
 		color: chalk.yellow,
 		icon: "⚙"
