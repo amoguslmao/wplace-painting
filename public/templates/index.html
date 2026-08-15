@@ -1,81 +1,508 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản lý Template - wplace-painting</title>
-  <link rel="stylesheet" href="/css/shared.css">
-  <link rel="stylesheet" href="/css/header.css">
-  <link rel="stylesheet" href="/css/footer.css">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <div class="main-content">
-      <div class="templates-container">
-        <div class="templates-header">
-          <h1>Quản lý Template</h1>
-          <button class="btn-primary" onclick="showCreateTemplateModal()">+ Tạo Template Mới</button>
-        </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Quản lý Template - wplace-painting</title>
+		<link rel="stylesheet" href="/css/shared.css" />
+		<link rel="stylesheet" href="/css/header.css" />
+		<link rel="stylesheet" href="/css/footer.css" />
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="container">
+			<main class="main-content">
+				<div class="templates-container">
+					<div class="templates-header">
+						<div>
+							<p class="page-eyebrow">Template workspace</p>
+							<h1>Quản lý Template</h1>
+						</div>
+						<button id="openCreateTemplateButton" type="button" class="btn-primary">
+							<span aria-hidden="true">+</span> Tạo Template Mới
+						</button>
+					</div>
 
-        <div id="templatesContainer" class="templates-grid">
-          <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Đang tải danh sách template...</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+					<div id="templatesContainer" class="templates-grid">
+						<div class="loading-state" role="status">
+							<div class="spinner" aria-hidden="true"></div>
+							<p>Đang tải danh sách template...</p>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
 
-  <!-- Modal: Tạo Template -->
-  <div id="createTemplateModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Tạo Template Mới</h2>
-        <button class="close-btn" onclick="toggleModal('createTemplateModal', false)">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="createTemplateForm">
-          <div class="form-group">
-            <label for="templateName">Tên Template:</label>
-            <input type="text" id="templateName" placeholder="Nhập tên template..." required />
-          </div>
-          <div class="form-group">
-            <label for="templateImage">Chọn Hình ảnh:</label>
-            <input type="file" id="templateImage" accept="image/*" required />
-          </div>
-          <div class="form-group">
-            <label for="templateDescription">Mô tả:</label>
-            <textarea id="templateDescription" placeholder="Mô tả template (tùy chọn)..." rows="4"></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="toggleModal('createTemplateModal', false)">Hủy</button>
-        <button class="btn-primary" onclick="submitCreateTemplate()">Tạo Template</button>
-      </div>
-    </div>
-  </div>
+		<div
+			id="createTemplateModal"
+			class="modal"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="createTemplateTitle"
+			aria-describedby="createTemplateDescription"
+		>
+			<div class="modal-content create-template-modal">
+				<div class="modal-header create-modal-header">
+					<div>
+						<p class="modal-eyebrow">Thiết lập template mới</p>
+						<h2 id="createTemplateTitle">Tạo Template</h2>
+						<p id="createTemplateDescription" class="modal-description">
+							Chọn ảnh PNG, kiểm tra bảng màu và cấu hình trước khi tạo.
+						</p>
+					</div>
+					<button
+						id="closeCreateTemplateButton"
+						type="button"
+						class="close-btn"
+						aria-label="Đóng cửa sổ tạo template"
+					>
+						&times;
+					</button>
+				</div>
 
-  <!-- Modal: Chi tiết Template -->
-  <div id="templateDetailModal" class="modal">
-    <div class="modal-content large">
-      <div class="modal-header">
-        <h2 id="detailModalTitle">Chi tiết Template</h2>
-        <button class="close-btn" onclick="toggleModal('templateDetailModal', false)">&times;</button>
-      </div>
-      <div class="modal-body" id="detailModalBody">
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="toggleModal('templateDetailModal', false)">Đóng</button>
-        <button class="btn-danger" onclick="deleteTemplate()">Xóa Template</button>
-      </div>
-    </div>
-  </div>
+				<ol class="create-progress" aria-label="Quy trình tạo template">
+					<li class="progress-step active" data-step="1" aria-current="step">
+						<span class="progress-index">1</span>
+						<span>Chọn PNG</span>
+					</li>
+					<li class="progress-step" data-step="2">
+						<span class="progress-index">2</span>
+						<span>Nhập thông tin</span>
+					</li>
+					<li class="progress-step" data-step="3">
+						<span class="progress-index">3</span>
+						<span>Tạo template</span>
+					</li>
+				</ol>
 
-  <script src="/js/shared.js"></script>
-  <script src="/js/api.js" type="module"></script>
-  <script src="script.js" type="module"></script>
-</body>
+				<div class="modal-body create-modal-body">
+					<form id="createTemplateForm">
+						<section class="form-section" aria-labelledby="imageStepTitle">
+							<div class="section-heading">
+								<span class="section-number" aria-hidden="true">1</span>
+								<div>
+									<h3 id="imageStepTitle">Tải ảnh PNG lên</h3>
+									<p>Chỉ chấp nhận file PNG hợp lệ.</p>
+								</div>
+							</div>
+
+							<div class="image-upload-layout">
+								<label class="image-dropzone" for="templateImage">
+									<input
+										type="file"
+										id="templateImage"
+										class="file-input"
+										accept=".png,image/png"
+										required
+									/>
+									<span class="upload-icon" aria-hidden="true">PNG</span>
+									<strong id="imageDropzoneTitle">Chọn một ảnh PNG</strong>
+									<span>Nhấn để duyệt file trên thiết bị</span>
+								</label>
+
+								<div id="imagePreviewPanel" class="image-preview-panel" hidden>
+									<div class="image-preview-frame">
+										<img id="templateImagePreview" alt="Xem trước ảnh template" />
+									</div>
+									<div class="selected-file-meta">
+										<strong id="selectedFileName"></strong>
+										<span id="selectedFileSize"></span>
+									</div>
+								</div>
+							</div>
+
+							<p
+								id="imageValidationMessage"
+								class="form-message"
+								role="status"
+								aria-live="polite"
+							></p>
+						</section>
+
+						<section
+							id="templateFieldsSection"
+							class="form-section"
+							aria-labelledby="informationStepTitle"
+							hidden
+						>
+							<div class="section-heading">
+								<span class="section-number" aria-hidden="true">2</span>
+								<div>
+									<h3 id="informationStepTitle">Thông tin và cấu hình</h3>
+									<p>Bạn có thể nhập thông tin trong lúc hệ thống kiểm tra màu.</p>
+								</div>
+							</div>
+
+							<div
+								id="paletteCheckCard"
+								class="palette-check-card"
+								data-state="idle"
+								role="status"
+								aria-live="polite"
+							>
+								<div class="palette-status-icon" aria-hidden="true">
+									<span class="spinner"></span>
+								</div>
+								<div class="palette-status-copy">
+									<strong id="paletteStatusTitle">Đang kiểm tra bảng màu...</strong>
+									<span id="paletteStatusDescription">
+										Kết quả từ server sẽ xuất hiện tại đây.
+									</span>
+									<div id="paletteResult" class="palette-result" hidden>
+										<div class="palette-summary">
+											<span><strong id="paletteDimensions">—</strong> Kích thước</span>
+											<span><strong id="paletteColorCount">—</strong> Màu</span>
+											<span><strong id="palettePixelCount">—</strong> Pixels</span>
+										</div>
+										<div id="paletteColors" class="palette-colors"></div>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-grid form-grid-two">
+								<div class="form-group">
+									<label for="templateName">Tên Template <span aria-hidden="true">*</span></label>
+									<input
+										type="text"
+										id="templateName"
+										placeholder="Ví dụ: Khu vực trung tâm"
+										autocomplete="off"
+										required
+									/>
+								</div>
+								<div class="form-group">
+									<label for="templateImageName">Tên ảnh trên server</label>
+									<input type="text" id="templateImageName" readonly />
+								</div>
+							</div>
+
+							<fieldset class="field-group">
+								<legend>Tọa độ</legend>
+								<p class="field-hint">Thứ tự gửi lên server: tile X, tile Y, pixel X, pixel Y.</p>
+								<div class="coordinate-grid">
+									<div class="form-group">
+										<label for="tileX">Tile X <span aria-hidden="true">*</span></label>
+										<input type="number" id="tileX" step="1" inputmode="numeric" required />
+									</div>
+									<div class="form-group">
+										<label for="tileY">Tile Y <span aria-hidden="true">*</span></label>
+										<input type="number" id="tileY" step="1" inputmode="numeric" required />
+									</div>
+									<div class="form-group">
+										<label for="pixelX">Pixel X <span aria-hidden="true">*</span></label>
+										<input type="number" id="pixelX" step="1" inputmode="numeric" required />
+									</div>
+									<div class="form-group">
+										<label for="pixelY">Pixel Y <span aria-hidden="true">*</span></label>
+										<input type="number" id="pixelY" step="1" inputmode="numeric" required />
+									</div>
+								</div>
+							</fieldset>
+
+							<fieldset class="field-group">
+								<legend>Tài khoản được gán</legend>
+								<div class="account-selection-actions">
+									<button id="selectAllAccountsButton" type="button" class="text-button">Chọn tất cả</button>
+									<button id="clearAccountsButton" type="button" class="text-button">Bỏ chọn</button>
+								</div>
+								<p class="field-hint">Có thể để trống, nhưng template sẽ chưa có tài khoản để vẽ.</p>
+								<div id="accountSelector" class="account-selector" aria-live="polite">
+									<div class="inline-loading">
+										<span class="spinner" aria-hidden="true"></span>
+										<span>Đang tải tài khoản...</span>
+									</div>
+								</div>
+								<p id="selectedAccountCount" class="selection-count">Đã chọn 0 tài khoản</p>
+							</fieldset>
+
+							<fieldset class="field-group">
+								<legend>Cài đặt vẽ</legend>
+								<div class="toggle-grid">
+									<label class="toggle-option" for="paintTransparentPixels">
+										<input type="checkbox" id="paintTransparentPixels" />
+										<span><strong>Vẽ pixel trong suốt</strong><small>paintTransparentPixels</small></span>
+									</label>
+									<label class="toggle-option" for="skipPaintedPixels">
+										<input type="checkbox" id="skipPaintedPixels" checked />
+										<span><strong>Bỏ qua pixel đã vẽ</strong><small>skipPaintedPixels</small></span>
+									</label>
+									<label class="toggle-option" for="outlineFirst">
+										<input type="checkbox" id="outlineFirst" />
+										<span><strong>Vẽ viền trước</strong><small>outlineFirst</small></span>
+									</label>
+									<label class="toggle-option" for="autoStart">
+										<input type="checkbox" id="autoStart" />
+										<span><strong>Tự động bắt đầu</strong><small>autoStart</small></span>
+									</label>
+								</div>
+							</fieldset>
+
+							<fieldset class="field-group">
+								<legend>Cài đặt mua tự động</legend>
+								<div class="toggle-grid">
+									<label class="toggle-option" for="enableBuyMaxCharges">
+										<input type="checkbox" id="enableBuyMaxCharges" />
+										<span><strong>Mua max charge</strong><small>buyMaxCharges</small></span>
+									</label>
+									<label class="toggle-option" for="buyPaintCharges">
+										<input type="checkbox" id="buyPaintCharges" />
+										<span><strong>Mua paint charge</strong><small>buyPaintCharges</small></span>
+									</label>
+									<label class="toggle-option" for="buyPremiumColors">
+										<input type="checkbox" id="buyPremiumColors" />
+										<span><strong>Mua màu premium</strong><small>buyPremiumColors</small></span>
+									</label>
+								</div>
+								<div id="buyMaxChargesLimitGroup" class="form-group max-charge-limit" hidden>
+									<label for="buyMaxChargesLimit">Dừng mua khi max charge đạt</label>
+									<input
+										type="number"
+										id="buyMaxChargesLimit"
+										min="0"
+										step="1"
+										value="0"
+										disabled
+									/>
+								</div>
+							</fieldset>
+						</section>
+					</form>
+				</div>
+
+				<div class="modal-footer create-modal-footer">
+					<p id="createSubmitStatus" class="submit-status" role="status" aria-live="polite">
+						Chọn một ảnh PNG để bắt đầu.
+					</p>
+					<div class="modal-actions">
+						<button id="cancelCreateTemplateButton" type="button" class="btn-secondary">Hủy</button>
+						<button
+							id="submitCreateTemplateButton"
+							type="submit"
+							form="createTemplateForm"
+							class="btn-primary"
+							disabled
+						>
+							Tạo Template
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div
+			id="editTemplateModal"
+			class="modal"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="editTemplateTitle"
+			aria-describedby="editTemplateDescription"
+		>
+			<div class="modal-content create-template-modal edit-template-modal">
+				<div class="modal-header create-modal-header">
+					<div>
+						<p class="modal-eyebrow">Cập nhật template</p>
+						<h2 id="editTemplateTitle">Chỉnh sửa Template</h2>
+						<p id="editTemplateDescription" class="modal-description">
+							Cập nhật thông tin, tài khoản được gán, tọa độ và cài đặt vẽ.
+						</p>
+					</div>
+					<button
+						id="closeEditTemplateButton"
+						type="button"
+						class="close-btn"
+						aria-label="Đóng cửa sổ chỉnh sửa template"
+					>
+						&times;
+					</button>
+				</div>
+
+				<div class="modal-body create-modal-body">
+					<div
+						id="editTemplateLoading"
+						class="edit-template-loading"
+						role="status"
+						aria-live="polite"
+						aria-atomic="true"
+					>
+						<span class="spinner" aria-hidden="true"></span>
+						<div class="edit-template-loading-copy">
+							<strong>Đang tải thông tin template...</strong>
+							<span>Vui lòng chờ trong giây lát.</span>
+						</div>
+					</div>
+
+					<form id="editTemplateForm" hidden>
+						<section class="form-section" aria-labelledby="editInformationTitle">
+							<div class="section-heading">
+								<div>
+									<h3 id="editInformationTitle">Thông tin và cấu hình</h3>
+									<p>Những thay đổi sẽ được áp dụng cho template hiện tại.</p>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label for="editTemplateName">Tên Template <span aria-hidden="true">*</span></label>
+								<input
+									type="text"
+									id="editTemplateName"
+									placeholder="Ví dụ: Khu vực trung tâm"
+									autocomplete="off"
+									required
+								/>
+							</div>
+
+							<fieldset class="field-group">
+								<legend>Tọa độ</legend>
+								<p class="field-hint">Thứ tự gửi lên server: tile X, tile Y, pixel X, pixel Y.</p>
+								<div class="coordinate-grid">
+									<div class="form-group">
+										<label for="editTileX">Tile X <span aria-hidden="true">*</span></label>
+										<input type="number" id="editTileX" step="1" inputmode="numeric" required />
+									</div>
+									<div class="form-group">
+										<label for="editTileY">Tile Y <span aria-hidden="true">*</span></label>
+										<input type="number" id="editTileY" step="1" inputmode="numeric" required />
+									</div>
+									<div class="form-group">
+										<label for="editPixelX">Pixel X <span aria-hidden="true">*</span></label>
+										<input type="number" id="editPixelX" step="1" inputmode="numeric" required />
+									</div>
+									<div class="form-group">
+										<label for="editPixelY">Pixel Y <span aria-hidden="true">*</span></label>
+										<input type="number" id="editPixelY" step="1" inputmode="numeric" required />
+									</div>
+								</div>
+							</fieldset>
+
+							<fieldset class="field-group">
+								<legend>Tài khoản được gán</legend>
+								<div class="account-selection-actions">
+									<button id="editSelectAllAccountsButton" type="button" class="text-button">
+										Chọn tất cả
+									</button>
+									<button id="editClearAccountsButton" type="button" class="text-button">Bỏ chọn</button>
+								</div>
+								<p class="field-hint">Có thể để trống, nhưng template sẽ chưa có tài khoản để vẽ.</p>
+								<div id="editAccountSelector" class="account-selector" aria-live="polite"></div>
+								<p id="editSelectedAccountCount" class="selection-count">Đã chọn 0 tài khoản</p>
+							</fieldset>
+
+							<fieldset class="field-group">
+								<legend>Cài đặt vẽ</legend>
+								<div class="toggle-grid">
+									<label class="toggle-option" for="editPaintTransparentPixels">
+										<input type="checkbox" id="editPaintTransparentPixels" />
+										<span><strong>Vẽ pixel trong suốt</strong><small>paintTransparentPixels</small></span>
+									</label>
+									<label class="toggle-option" for="editSkipPaintedPixels">
+										<input type="checkbox" id="editSkipPaintedPixels" />
+										<span><strong>Bỏ qua pixel đã vẽ</strong><small>skipPaintedPixels</small></span>
+									</label>
+									<label class="toggle-option" for="editOutlineFirst">
+										<input type="checkbox" id="editOutlineFirst" />
+										<span><strong>Vẽ viền trước</strong><small>outlineFirst</small></span>
+									</label>
+									<label class="toggle-option" for="editAutoStart">
+										<input type="checkbox" id="editAutoStart" />
+										<span><strong>Tự động bắt đầu</strong><small>autoStart</small></span>
+									</label>
+								</div>
+							</fieldset>
+
+							<fieldset class="field-group">
+								<legend>Cài đặt mua tự động</legend>
+								<div class="toggle-grid">
+									<label class="toggle-option" for="editEnableBuyMaxCharges">
+										<input type="checkbox" id="editEnableBuyMaxCharges" />
+										<span><strong>Mua max charge</strong><small>buyMaxCharges</small></span>
+									</label>
+									<label class="toggle-option" for="editBuyPaintCharges">
+										<input type="checkbox" id="editBuyPaintCharges" />
+										<span><strong>Mua paint charge</strong><small>buyPaintCharges</small></span>
+									</label>
+									<label class="toggle-option" for="editBuyPremiumColors">
+										<input type="checkbox" id="editBuyPremiumColors" />
+										<span><strong>Mua màu premium</strong><small>buyPremiumColors</small></span>
+									</label>
+								</div>
+								<div id="editBuyMaxChargesLimitGroup" class="form-group max-charge-limit" hidden>
+									<label for="editBuyMaxChargesLimit">Dừng mua khi max charge đạt</label>
+									<input
+										type="number"
+										id="editBuyMaxChargesLimit"
+										min="0"
+										step="1"
+										value="0"
+										disabled
+									/>
+								</div>
+							</fieldset>
+						</section>
+					</form>
+				</div>
+
+				<div class="modal-footer create-modal-footer">
+					<p id="editSubmitStatus" class="submit-status" role="status" aria-live="polite">
+						Đang tải dữ liệu template...
+					</p>
+					<div class="modal-actions">
+						<button id="cancelEditTemplateButton" type="button" class="btn-secondary">Hủy</button>
+						<button
+							id="submitEditTemplateButton"
+							type="submit"
+							form="editTemplateForm"
+							class="btn-primary"
+							disabled
+						>
+							Lưu thay đổi
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div
+			id="deleteTemplateModal"
+			class="modal"
+			role="alertdialog"
+			aria-modal="true"
+			aria-labelledby="deleteTemplateTitle"
+			aria-describedby="deleteTemplatePrompt deleteTemplateDescription"
+		>
+			<div class="modal-content delete-template-modal">
+				<div class="modal-header delete-modal-header">
+					<div>
+						<p class="modal-eyebrow">Xác nhận xóa</p>
+						<h2 id="deleteTemplateTitle">Xóa Template?</h2>
+					</div>
+					<button
+						id="closeDeleteTemplateButton"
+						type="button"
+						class="close-btn"
+						aria-label="Đóng cửa sổ xác nhận xóa template"
+					>
+						&times;
+					</button>
+				</div>
+
+				<div class="modal-body delete-modal-body">
+					<p id="deleteTemplatePrompt">Bạn có chắc chắn muốn xóa template này?</p>
+					<p id="deleteTemplateDescription" class="delete-warning">
+						Hành động này không thể hoàn lại.
+					</p>
+					<p id="deleteSubmitStatus" class="submit-status" role="status" aria-live="polite"></p>
+				</div>
+
+				<div class="modal-footer delete-modal-footer">
+					<button id="cancelDeleteTemplateButton" type="button" class="btn-secondary">Hủy</button>
+					<button id="confirmDeleteTemplateButton" type="button" class="btn-danger">
+						Xóa Template
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<script src="/js/shared.js"></script>
+		<script src="script.js" type="module"></script>
+	</body>
 </html>

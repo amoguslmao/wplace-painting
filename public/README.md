@@ -54,6 +54,7 @@ Server sẽ chạy tại `http://localhost:PORT` (mặc định là port đượ
 ### 2. Truy cập Dashboard
 
 Mở trình duyệt và truy cập:
+
 ```
 http://localhost:PORT
 ```
@@ -61,15 +62,18 @@ http://localhost:PORT
 ## 📋 Các Trang/Tính Năng
 
 ### 1. **Dashboard** (/)
+
 - Trang chủ với thanh sidebar điều hướng
 - Hiển thị thống kê nhanh (số tài khoản, template, logs, queue)
 - Quick actions để truy cập nhanh các tính năng
 - Thông tin hệ thống
 
 ### 2. **Quản lý Tài Khoản** (/accounts/)
+
 Chia thành 2 phần chính:
 
 **Phần 1: Bulk Actions**
+
 - ✨ Thêm tài khoản bằng JWT Token
 - 🔄 Fetch tất cả tài khoản (bulk fetch)
 - 📥 Nhập hàng loạt JWT Token
@@ -78,6 +82,7 @@ Chia thành 2 phần chính:
 
 **Phần 2: Danh sách Tài Khoản (Card View)**  
 Mỗi tài khoản hiển thị:
+
 - Username#ID (tên người dùng kèm ID)
 - Account ID (nhỏ, màu xám)
 - Level với % tiến độ
@@ -88,64 +93,69 @@ Mỗi tài khoản hiển thị:
 - Các nút hành động: Fetch, Sửa, Xóa
 
 ### 3. **Quản lý Template** (/templates/)
+
 - Hiển thị danh sách template dưới dạng card
 - Cho mỗi template:
-  - Hình ảnh đã được chỉnh sửa
-  - Tên, mô tả
-  - Số lượng tài khoản
-  - Các nút: Sửa, Xóa
+    - Hình ảnh đã được chỉnh sửa
+    - Tên, mô tả
+    - Số lượng tài khoản
+    - Các nút: Sửa, Xóa
 - Chi tiết template:
-  - Thông tin cơ bản
-  - Danh sách tài khoản dùng template
-  - Settings (tọa độ, kích thước, etc.)
+    - Thông tin cơ bản
+    - Danh sách tài khoản dùng template
+    - Settings (tọa độ, kích thước, etc.)
 
 ### 4. **Real-time Logs** (/logs/)
+
 - Fetch logs từ API
 - Tùy chỉnh:
-  - Fetch Interval (1-60 giây)
-  - Số lượng logs (10-500)
-  - Auto Refresh (bật/tắt)
-  - Lọc theo Level (error, warning, info, debug)
+    - Fetch Interval (1-60 giây)
+    - Số lượng logs (10-500)
+    - Auto Refresh (bật/tắt)
+    - Lọc theo Level (error, warning, info, debug)
 - Hiển thị logs dạng list với:
-  - Level (color-coded)
-  - Thời gian
-  - Nội dung log
+    - Level (color-coded)
+    - Thời gian
+    - Nội dung log
 - Click log để xem chi tiết
 
-### 5. **Queue** (/queue/)  
+### 5. **Queue** (/queue/)
+
 Hiển thị các tài khoản đang charge:
+
 - Thống kê:
-  - Số tài khoản đang charge
-  - Tổng charges
-  - Charges được sử dụng
-  - Thời gian cập nhật
+    - Số tài khoản đang charge
+    - Tổng charges
+    - Charges được sử dụng
+    - Thời gian cập nhật
 - Danh sách tài khoản với:
-  - Status (Đang Charge/Sẵn sàng)
-  - Charges hiện tại/max
-  - Cooldown
-  - Alliance
-  - Countdown timer (tính real-time)
-  - Progress bar
+    - Status (Đang Charge/Sẵn sàng)
+    - Charges hiện tại/max
+    - Cooldown
+    - Alliance
+    - Countdown timer (tính real-time)
+    - Progress bar
 - Controls:
-  - Fetch Ngay
-  - Auto Refresh
-  - Sort (Old first/New first)
-  - Xóa danh sách
+    - Fetch Ngay
+    - Auto Refresh
+    - Sort (Old first/New first)
+    - Xóa danh sách
 
 ### 6. **Chỉnh sửa Tài Khoản** (/edit-account/?id=<accountId>)
+
 - Chỉnh sửa thông tin tài khoản:
-  - Level
-  - Pixels Painted
-  - Droplets
-  - Country, Discord
-  - Charges (current, max, cooldown)
-  - Alliance ID & Role
-  - Role, Is Customer
-  - Show Last Pixel, Needs Phone Verification
+    - Level
+    - Pixels Painted
+    - Droplets
+    - Country, Discord
+    - Charges (current, max, cooldown)
+    - Alliance ID & Role
+    - Role, Is Customer
+    - Show Last Pixel, Needs Phone Verification
 - Xem thông tin hệ thống (read-only):
-  - Token hết hạn
-  - Timeout Until
-  - Last Fetch
+    - Token hết hạn
+    - Timeout Until
+    - Last Fetch
 - Lưu thay đổi (với xác nhận modal)
 
 ## 🔗 API Endpoints
@@ -186,24 +196,26 @@ GET    /api/queue                        - Lấy queue
 - JWT Token được parse bằng `parseJWT()` function trong `/public/js/jwtParser.js`
 - Có thể lấy expiration date, validate token, format thời gian
 - Các hàm có sẵn:
-  - `parseJWT(token)` - Parse token
-  - `getJWTExpiration(token)` - Lấy expiration
-  - `isJWTExpired(token)` - Check hết hạn
-  - `formatJWTExpiration(token)` - Format thời gian
+    - `parseJWT(token)` - Parse token
+    - `getJWTExpiration(token)` - Lấy expiration
+    - `isJWTExpired(token)` - Check hết hạn
+    - `formatJWTExpiration(token)` - Format thời gian
 
 ## 🔔 Notifications
 
 Sử dụng `showNotification(message, type, duration)`:
+
 - `type`: 'success', 'danger', 'warning', 'info'
 - `duration`: milliseconds (mặc định 3000)
 
 ```javascript
-showNotification('Thành công!', 'success', 3000);
+showNotification("Thành công!", "success", 3000);
 ```
 
 ## 🔄 Auto-Refresh
 
 Các trang logs và queue có tính năng auto-refresh:
+
 - Tùy chỉnh fetch interval
 - Bật/tắt auto refresh
 - Timer cập nhật real-time
@@ -217,8 +229,9 @@ Các trang logs và queue có tính năng auto-refresh:
 ## ⚙️ Cấu hình
 
 Các cấu hình chính trong `/public/js/api.js`:
+
 ```javascript
-const API_BASE_URL = '/api';  // Đổi nếu API ở endpoint khác
+const API_BASE_URL = "/api"; // Đổi nếu API ở endpoint khác
 ```
 
 ## 🐛 Lưu ý
@@ -231,6 +244,7 @@ const API_BASE_URL = '/api';  // Đổi nếu API ở endpoint khác
 ## 📝 Commit Message Guidelines
 
 Khi có thay đổi frontend, hãy use meaningful commit messages:
+
 ```
 feat: Add new feature
 fix: Fix bug

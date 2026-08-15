@@ -1,276 +1,420 @@
-import { getQueue } from '/js/api.js';
+import { getQueue } from "/js/api.js";
 
-// State
-let queueData = [];
-let autoRefreshInterval = null;
-let fetchInterval = 2000; // 2 seconds
-let isAutoRefresh = false;
-let sortAscending = true;
-let timerIntervals = {};
+const QueueManager = (() => {
+	let queueData = [];
+	let autoRefreshInterval = null;
+	let fetchInterval = 2000; // 2 seconds
+	let isAutoRefresh = false;
+	let sortAscending = true;
+	let timerIntervals = {};
 
-// Initialization
-document.addEventListener('DOMContentLoaded', () => {
-  fetchQueueNow();
-});
+	const init = () => {
+		document.addEventListener("DOMContentLoaded", fetchQueueNow);
+		window.addEventListener("beforeunload", cleanup);
+	};
 
-/**
- * Fetch queue từ API
- */
-async function fetchQueueNow() {
-  try {
-    const response = await getQueue();
-    queueData = response.data || [];
-    
-    renderQueue();
-    updateStats();
-    updateUpdateTime();
-  } catch (error) {
-    console.error('Error fetching queue:', error);
-    showNotification(error.message || 'Lỗi khi fetch queue', 'danger');
-  }
-}
+	/**
+	 * Fetch queue từ API
+	 */
+	const fetchQueueNow = async () => {
+		try {
+			const response = await getQueue();
+			queueData = response.data || [];
 
-/**
- * Render queue items
- */
-function renderQueue() {
-  const container = document.getElementById('queueContainer');
-  
-  if (queueData.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
+			renderQueue();
+			updateStats();
+			updateUpdateTime();
+		} catch (error) {
+			console.error("Error fetching queue:", error);
+			showNotification(error.message || "Lỗi khi fetch queue", "danger");
+		}
+	};
+
+	/**
+	 * Render queue items
+	 */
+	const renderQueue = () => {
+		const container = document.getElementById("queueContainer");
+
+		if (!container) return;
+
+		if (queueData.length === 0) {
+			container.innerHTML = "";
+			const emptyState = document.createElement("div");
+			emptyState.className = "empty-state";
+			emptyState.innerHTML = `
         <div class="emoji">📭</div>
         <p>Chưa có dữ liệu</p>
         <p class="text-muted">Nhấn "Fetch Ngay" để tải danh sách hoặc bật Auto Refresh</p>
-      </div>
-    `;
-    return;
-  }
+      `;
+			container.appendChild(emptyState);
+			return;
+		}
 
-  // Clear existing timers
-  Object.keys(timerIntervals).forEach(key => clearInterval(timerIntervals[key]));
-  timerIntervals = {};
+		// Clear existing timers
+		Object.keys(timerIntervals).forEach((key) =>
+			clearInterval(timerIntervals[key]),
+		);
+		timerIntervals = {};
 
-  // Sort queue items
-  const sortedQueue = [...queueData].sort((a, b) => {
-    const timeA = new Date(a.chargeUntil).getTime();
-    const timeB = new Date(b.chargeUntil).getTime();
-    return sortAscending ? timeA - timeB : timeB - timeA;
-  });
+		// Sort queue items
+		const sortedQueue = [...queueData].sort((a, b) => {
+			const timeA = new Date(a.chargeUntil).getTime();
+			const timeB = new Date(b.chargeUntil).getTime();
+			return sortAscending ? timeA - timeB : timeB - timeA;
+		});
 
-  container.innerHTML = sortedQueue.map((item, index) => createQueueItem(item, index)).join('');
+		container.innerHTML = "";
+		sortedQueue.forEach((item, index) => {
+			const queueItem = createQueueItem(item, index);
+			container.appendChild(queueItem);
+		});
 
-  // Start timers
-  sortedQueue.forEach((item, index) => {
-    startTimer(item.id || index, item.chargeUntil, item.charges.cooldownMs);
-  });
-}
+		// Start timers
+		sortedQueue.forEach((item, index) => {
+			startTimer(
+				item.id || index,
+				item.chargeUntil,
+				item.charges.cooldownMs,
+			);
+		});
+	};
 
-/**
- * Tạo queue item
- */
-function createQueueItem(item, index) {
-  const chargeUntilTime = new Date(item.chargeUntil);
-  const now = new Date();
-  const isCharging = chargeUntilTime > now;
-  const timeRemaining = Math.max(0, chargeUntilTime.getTime() - now.getTime());
+	/**
+	 * Tạo queue item element
+	 */
+	const createQueueItem = (item, index) => {
+		const chargeUntilTime = new Date(item.chargeUntil);
+		const now = new Date();
+		const isCharging = chargeUntilTime > now;
+		const timeRemaining = Math.max(
+			0,
+			chargeUntilTime.getTime() - now.getTime(),
+		);
 
-  const statusClass = isCharging ? 'charging' : 'ready';
-  const statusText = isCharging ? '⏳ Đang Charge' : '✅ Sẵn sàng';
+		const statusClass = isCharging ? "charging" : "ready";
+		const statusText = isCharging ? "⏳ Đang Charge" : "✅ Sẵn sàng";
 
-  return `
-    <div class="queue-item ${statusClass}" data-queue-id="${item.id || index}">
-      <div class="queue-item-info">
-        <div class="queue-item-header">
-          <span class="queue-account-name">${item.user.name}#${item.user.id}</span>
-          <span class="queue-item-status ${statusClass}">${statusText}</span>
-        </div>
+		const queueDiv = document.createElement("div");
+		queueDiv.className = `queue-item ${statusClass}`;
+		queueDiv.setAttribute("data-queue-id", item.id || index);
 
-        <div class="queue-item-details">
-          <div class="queue-detail">
-            <span class="queue-detail-label">Charges Hiện tại</span>
-            <span class="queue-detail-value">${item.charges.count}/${item.charges.max}</span>
-          </div>
-          <div class="queue-detail">
-            <span class="queue-detail-label">Cooldown</span>
-            <span class="queue-detail-value">${(item.charges.cooldownMs / 1000).toFixed(1)}s</span>
-          </div>
-          <div class="queue-detail">
-            <span class="queue-detail-label">Alliance</span>
-            <span class="queue-detail-value">${item.user.allianceId || 'N/A'}</span>
-          </div>
-        </div>
+		const infoDiv = document.createElement("div");
+		infoDiv.className = "queue-item-info";
 
-        ${isCharging ? `
-          <div class="queue-progress-bar">
-            <div class="queue-progress-fill" id="progress-${item.id || index}" style="width: ${getProgressPercentage(chargeUntilTime)}%"></div>
-          </div>
-        ` : ''}
-      </div>
+		// Header
+		const headerDiv = document.createElement("div");
+		headerDiv.className = "queue-item-header";
 
-      <div class="queue-item-timer">
-        <span class="queue-timer-label">Thời gian</span>
-        <span class="queue-timer-value" id="timer-${item.id || index}">
-          ${formatTime(timeRemaining)}
-        </span>
-      </div>
-    </div>
-  `;
-}
+		const nameSpan = document.createElement("span");
+		nameSpan.className = "queue-account-name";
+		nameSpan.textContent = `${item.user.name}#${item.user.id}`;
 
-/**
- * Start timer cho item
- */
-function startTimer(id, chargeUntilTime, cooldownMs) {
-  const chargeUntil = new Date(chargeUntilTime);
+		const statusSpan = document.createElement("span");
+		statusSpan.className = `queue-item-status ${statusClass}`;
+		statusSpan.textContent = statusText;
 
-  const updateTimer = () => {
-    const now = new Date();
-    const timeRemaining = Math.max(0, chargeUntil.getTime() - now.getTime());
-    
-    const timerElement = document.getElementById(`timer-${id}`);
-    if (timerElement) {
-      timerElement.textContent = formatTime(timeRemaining);
-    }
+		headerDiv.appendChild(nameSpan);
+		headerDiv.appendChild(statusSpan);
 
-    const progressElement = document.getElementById(`progress-${id}`);
-    if (progressElement) {
-      const progress = getProgressPercentage(chargeUntil);
-      progressElement.style.width = `${Math.max(0, progress)}%`;
-    }
+		// Details
+		const detailsDiv = document.createElement("div");
+		detailsDiv.className = "queue-item-details";
 
-    if (timeRemaining <= 0) {
-      // Timer hoàn thành
-      if (timerIntervals[id]) {
-        clearInterval(timerIntervals[id]);
-        delete timerIntervals[id];
-      }
-    }
-  };
+		const chargesDetail = createQueueDetail(
+			"Charges Hiện tại",
+			`${item.charges.count}/${item.charges.max}`,
+		);
+		const cooldownDetail = createQueueDetail(
+			"Cooldown",
+			`${(item.charges.cooldownMs / 1000).toFixed(1)}s`,
+		);
+		const allianceDetail = createQueueDetail(
+			"Alliance",
+			item.user.allianceId || "N/A",
+		);
 
-  timerIntervals[id] = setInterval(updateTimer, 1000);
-  updateTimer(); // Call immediately
-}
+		detailsDiv.appendChild(chargesDetail);
+		detailsDiv.appendChild(cooldownDetail);
+		detailsDiv.appendChild(allianceDetail);
 
-/**
- * Get progress percentage
- */
-function getProgressPercentage(chargeUntilTime) {
-  const chargeUntil = new Date(chargeUntilTime);
-  const now = new Date();
-  const timeRemaining = Math.max(0, chargeUntil.getTime() - now.getTime());
-  const totalTime = chargeUntil.getTime() - (chargeUntil.getTime() - timeRemaining);
-  
-  // Tìm item để lấy cooldownMs
-  const queueItem = queueData.find(item => {
-    const until = new Date(item.chargeUntil);
-    return until.getTime() === chargeUntil.getTime();
-  });
+		// Progress bar if charging
+		if (isCharging) {
+			const progressBar = document.createElement("div");
+			progressBar.className = "queue-progress-bar";
 
-  if (!queueItem) return 100;
-  
-  const cooldownMs = queueItem.charges.cooldownMs || 30000;
-  const progress = ((cooldownMs - timeRemaining) / cooldownMs) * 100;
-  return Math.min(100, Math.max(0, progress));
-}
+			const progressFill = document.createElement("div");
+			progressFill.className = "queue-progress-fill";
+			progressFill.id = `progress-${item.id || index}`;
+			progressFill.style.width = `${getProgressPercentage(chargeUntilTime)}%`;
 
-/**
- * Format time
- */
-function formatTime(ms) {
-  if (ms <= 0) return '00:00:00';
-  
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+			progressBar.appendChild(progressFill);
+			infoDiv.appendChild(progressBar);
+		}
 
-  if (hours > 0) {
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  }
+		infoDiv.appendChild(headerDiv);
+		infoDiv.appendChild(detailsDiv);
 
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
+		// Timer
+		const timerDiv = document.createElement("div");
+		timerDiv.className = "queue-item-timer";
 
-/**
- * Update stats
- */
-function updateStats() {
-  const chargingCount = queueData.filter(item => {
-    const chargeUntil = new Date(item.chargeUntil);
-    return chargeUntil > new Date();
-  }).length;
+		const timerLabelSpan = document.createElement("span");
+		timerLabelSpan.className = "queue-timer-label";
+		timerLabelSpan.textContent = "Thời gian";
 
-  const totalCharges = queueData.reduce((sum, item) => sum + item.charges.max, 0);
-  const usedCharges = queueData.reduce((sum, item) => sum + (item.charges.max - item.charges.count), 0);
+		const timerValueSpan = document.createElement("span");
+		timerValueSpan.className = "queue-timer-value";
+		timerValueSpan.id = `timer-${item.id || index}`;
+		timerValueSpan.textContent = formatTime(timeRemaining);
 
-  document.getElementById('chargingAccountCount').textContent = chargingCount;
-  document.getElementById('totalCharges').textContent = totalCharges;
-  document.getElementById('usedCharges').textContent = usedCharges;
-}
+		timerDiv.appendChild(timerLabelSpan);
+		timerDiv.appendChild(timerValueSpan);
 
-/**
- * Update update time
- */
-function updateUpdateTime() {
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('vi-VN');
-  document.getElementById('updateTime').textContent = timeStr;
-}
+		queueDiv.appendChild(infoDiv);
+		queueDiv.appendChild(timerDiv);
 
-/**
- * Toggle auto refresh
- */
-function toggleAutoRefresh() {
-  isAutoRefresh = !isAutoRefresh;
+		return queueDiv;
+	};
 
-  if (isAutoRefresh) {
-    document.getElementById('autoRefreshStatus').textContent = '🟢 Bật Auto Refresh';
-    autoRefreshInterval = setInterval(() => {
-      fetchQueueNow();
-    }, fetchInterval);
-    showNotification(`Auto Refresh bật (${fetchInterval / 1000}s)`, 'success');
-  } else {
-    document.getElementById('autoRefreshStatus').textContent = '🔴 Tắt Auto Refresh';
-    if (autoRefreshInterval) {
-      clearInterval(autoRefreshInterval);
-    }
-    showNotification('Auto Refresh tắt', 'success');
-  }
-}
+	/**
+	 * Create queue detail element
+	 */
+	const createQueueDetail = (label, value) => {
+		const detailDiv = document.createElement("div");
+		detailDiv.className = "queue-detail";
 
-/**
- * Toggle sort order
- */
-function toggleSortOrder() {
-  sortAscending = !sortAscending;
-  const sortText = sortAscending ? 
-    '⬇️ Sắp xếp theo Thời gian (Cũ trước)' : 
-    '⬆️ Sắp xếp theo Thời gian (Mới trước)';
-  document.getElementById('sortStatus').textContent = sortText;
-  renderQueue();
-}
+		const labelSpan = document.createElement("span");
+		labelSpan.className = "queue-detail-label";
+		labelSpan.textContent = label;
 
-/**
- * Clear queue
- */
-function clearQueue() {
-  if (!confirm('Bạn có chắc chắn muốn xóa danh sách này? (Điều này chỉ xóa trên màn hình)')) {
-    return;
-  }
+		const valueSpan = document.createElement("span");
+		valueSpan.className = "queue-detail-value";
+		valueSpan.textContent = value;
 
-  queueData = [];
-  Object.keys(timerIntervals).forEach(key => clearInterval(timerIntervals[key]));
-  timerIntervals = {};
-  renderQueue();
-  updateStats();
-  showNotification('Queue đã được xóa', 'success');
-}
+		detailDiv.appendChild(labelSpan);
+		detailDiv.appendChild(valueSpan);
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-  if (autoRefreshInterval) {
-    clearInterval(autoRefreshInterval);
-  }
-  Object.keys(timerIntervals).forEach(key => clearInterval(timerIntervals[key]));
-});
+		return detailDiv;
+	};
+
+	/**
+	 * Start timer cho item
+	 */
+	const startTimer = (id, chargeUntilTime, cooldownMs) => {
+		const chargeUntil = new Date(chargeUntilTime);
+
+		const updateTimer = () => {
+			const now = new Date();
+			const timeRemaining = Math.max(
+				0,
+				chargeUntil.getTime() - now.getTime(),
+			);
+
+			const timerElement = document.getElementById(`timer-${id}`);
+			if (timerElement) {
+				timerElement.textContent = formatTime(timeRemaining);
+			}
+
+			const progressElement = document.getElementById(`progress-${id}`);
+			if (progressElement) {
+				const progress = getProgressPercentage(chargeUntil);
+				progressElement.style.width = `${Math.max(0, progress)}%`;
+			}
+
+			if (timeRemaining <= 0) {
+				// Timer hoàn thành
+				if (timerIntervals[id]) {
+					clearInterval(timerIntervals[id]);
+					delete timerIntervals[id];
+				}
+			}
+		};
+
+		timerIntervals[id] = setInterval(updateTimer, 1000);
+		updateTimer(); // Call immediately
+	};
+
+	/**
+	 * Get progress percentage
+	 */
+	const getProgressPercentage = (chargeUntilTime) => {
+		const chargeUntil = new Date(chargeUntilTime);
+		const now = new Date();
+		const timeRemaining = Math.max(
+			0,
+			chargeUntil.getTime() - now.getTime(),
+		);
+
+		// Tìm item để lấy cooldownMs
+		const queueItem = queueData.find((item) => {
+			const until = new Date(item.chargeUntil);
+			return until.getTime() === chargeUntil.getTime();
+		});
+
+		if (!queueItem) return 100;
+
+		const cooldownMs = queueItem.charges.cooldownMs || 30000;
+		const progress = ((cooldownMs - timeRemaining) / cooldownMs) * 100;
+		return Math.min(100, Math.max(0, progress));
+	};
+
+	/**
+	 * Format time
+	 */
+	const formatTime = (ms) => {
+		if (ms <= 0) return "00:00:00";
+
+		const totalSeconds = Math.floor(ms / 1000);
+		const hours = Math.floor(totalSeconds / 3600);
+		const minutes = Math.floor((totalSeconds % 3600) / 60);
+		const seconds = totalSeconds % 60;
+
+		if (hours > 0) {
+			return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+		}
+
+		return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+	};
+
+	/**
+	 * Update stats
+	 */
+	const updateStats = () => {
+		const chargingCount = queueData.filter((item) => {
+			const chargeUntil = new Date(item.chargeUntil);
+			return chargeUntil > new Date();
+		}).length;
+
+		const totalCharges = queueData.reduce(
+			(sum, item) => sum + item.charges.max,
+			0,
+		);
+		const usedCharges = queueData.reduce(
+			(sum, item) => sum + (item.charges.max - item.charges.count),
+			0,
+		);
+
+		const chargingElement = document.getElementById("chargingAccountCount");
+		if (chargingElement) {
+			chargingElement.textContent = chargingCount;
+		}
+
+		const totalElement = document.getElementById("totalCharges");
+		if (totalElement) {
+			totalElement.textContent = totalCharges;
+		}
+
+		const usedElement = document.getElementById("usedCharges");
+		if (usedElement) {
+			usedElement.textContent = usedCharges;
+		}
+	};
+
+	/**
+	 * Update update time
+	 */
+	const updateUpdateTime = () => {
+		const now = new Date();
+		const timeStr = now.toLocaleTimeString("vi-VN");
+		const timeElement = document.getElementById("updateTime");
+		if (timeElement) {
+			timeElement.textContent = timeStr;
+		}
+	};
+
+	/**
+	 * Toggle auto refresh
+	 */
+	const toggleAutoRefresh = () => {
+		isAutoRefresh = !isAutoRefresh;
+
+		const statusElement = document.getElementById("autoRefreshStatus");
+
+		if (isAutoRefresh) {
+			if (statusElement) {
+				statusElement.textContent = "🟢 Bật Auto Refresh";
+			}
+			autoRefreshInterval = setInterval(() => {
+				fetchQueueNow();
+			}, fetchInterval);
+			showNotification(
+				`Auto Refresh bật (${fetchInterval / 1000}s)`,
+				"success",
+			);
+		} else {
+			if (statusElement) {
+				statusElement.textContent = "🔴 Tắt Auto Refresh";
+			}
+			if (autoRefreshInterval) {
+				clearInterval(autoRefreshInterval);
+			}
+			showNotification("Auto Refresh tắt", "success");
+		}
+	};
+
+	/**
+	 * Toggle sort order
+	 */
+	const toggleSortOrder = () => {
+		sortAscending = !sortAscending;
+		const sortText = sortAscending
+			? "⬇️ Sắp xếp theo Thời gian (Cũ trước)"
+			: "⬆️ Sắp xếp theo Thời gian (Mới trước)";
+		const sortElement = document.getElementById("sortStatus");
+		if (sortElement) {
+			sortElement.textContent = sortText;
+		}
+		renderQueue();
+	};
+
+	/**
+	 * Clear queue
+	 */
+	const clearQueue = () => {
+		if (
+			!confirm(
+				"Bạn có chắc chắn muốn xóa danh sách này? (Điều này chỉ xóa trên màn hình)",
+			)
+		) {
+			return;
+		}
+
+		queueData = [];
+		Object.keys(timerIntervals).forEach((key) =>
+			clearInterval(timerIntervals[key]),
+		);
+		timerIntervals = {};
+		renderQueue();
+		updateStats();
+		showNotification("Queue đã được xóa", "success");
+	};
+
+	/**
+	 * Cleanup on page unload
+	 */
+	const cleanup = () => {
+		if (autoRefreshInterval) {
+			clearInterval(autoRefreshInterval);
+		}
+		Object.keys(timerIntervals).forEach((key) =>
+			clearInterval(timerIntervals[key]),
+		);
+	};
+
+	return {
+		init,
+		fetchQueueNow,
+		toggleAutoRefresh,
+		toggleSortOrder,
+		clearQueue,
+	};
+})();
+
+QueueManager.init();
+
+// Export to global scope for inline onclick handlers
+window.fetchQueueNow = QueueManager.fetchQueueNow;
+window.toggleAutoRefresh = QueueManager.toggleAutoRefresh;
+window.toggleSortOrder = QueueManager.toggleSortOrder;
+window.clearQueue = QueueManager.clearQueue;

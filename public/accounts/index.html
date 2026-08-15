@@ -1,138 +1,215 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản lý Tài Khoản - wplace-painting</title>
-  <link rel="stylesheet" href="/css/shared.css">
-  <link rel="stylesheet" href="/css/header.css">
-  <link rel="stylesheet" href="/css/footer.css">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <div class="main-content">
-      <div class="accounts-container">
-        <!-- Bulk Actions Section -->
-        <section class="bulk-actions-section">
-          <h1>Quản lý Tài Khoản</h1>
-          
-          <div class="actions-wrapper">
-            <!-- Thêm tài khoản mới -->
-            <div class="action-group">
-              <h3>Thêm Tài Khoản</h3>
-              <div class="form-group">
-                <label for="jwtTokenInput">JWT Token:</label>
-                <input type="text" id="jwtTokenInput" placeholder="Dán JWT Token của bạn tại đây..." />
-              </div>
-              <button class="btn-primary" onclick="addNewAccount()">Thêm Tài Khoản</button>
-            </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Quản lý Tài Khoản - wplace-painting</title>
+		<link rel="stylesheet" href="/css/shared.css" />
+		<link rel="stylesheet" href="/css/header.css" />
+		<link rel="stylesheet" href="/css/footer.css" />
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="main-content">
+				<div class="accounts-container">
+					<!-- Bulk Actions Section -->
+					<section class="bulk-actions-section">
+						<h1>Quản lý Tài Khoản</h1>
 
-            <!-- Bulk Actions -->
-            <div class="action-group">
-              <h3>Hành động Hàng loạt</h3>
-              <div class="buttons-grid">
-                <button class="btn-info" onclick="bulkFetchAll()">
-                  <span class="icon">🔄</span> Fetch Tất Cả
-                </button>
-                <button class="btn-secondary" onclick="showBulkImportModal()">
-                  <span class="icon">📥</span> Nhập Hàng loạt
-                </button>
-                <button class="btn-secondary" onclick="exportAccounts()">
-                  <span class="icon">📤</span> Xuất Dữ liệu
-                </button>
-                <button class="btn-secondary" onclick="refreshAccountsList()">
-                  <span class="icon">♻️</span> Làm mới Danh sách
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+						<div class="actions-wrapper">
+							<!-- Thêm tài khoản mới -->
+							<div class="action-group">
+								<h3>Thêm Tài Khoản</h3>
+								<div class="form-group">
+									<label for="jwtTokenInput"
+										>JWT Token:</label
+									>
+									<input
+										type="text"
+										id="jwtTokenInput"
+										placeholder="Dán JWT Token của bạn tại đây..."
+									/>
+								</div>
+								<button
+									class="btn-primary"
+									onclick="addNewAccount()"
+								>
+									Thêm Tài Khoản
+								</button>
+							</div>
 
-        <!-- Divider -->
-        <div class="section-divider"></div>
+							<!-- Bulk Actions -->
+							<div class="action-group">
+								<h3>Hành động Hàng loạt</h3>
+								<div class="buttons-grid">
+									<button
+										class="btn-info"
+										onclick="bulkFetchAll()"
+									>
+										<span class="icon">🔄</span> Fetch Tất
+										Cả
+									</button>
+									<button
+										class="btn-secondary"
+										onclick="showBulkImportModal()"
+									>
+										<span class="icon">📥</span> Nhập Hàng
+										loạt
+									</button>
+									<button
+										class="btn-secondary"
+										onclick="exportAccounts()"
+									>
+										<span class="icon">📤</span> Xuất Dữ
+										liệu
+									</button>
+									<button
+										class="btn-secondary"
+										onclick="refreshAccountsList()"
+									>
+										<span class="icon">♻️</span> Làm mới
+										Danh sách
+									</button>
+								</div>
+							</div>
+						</div>
+					</section>
 
-        <!-- Accounts List Section -->
-        <section class="accounts-list-section">
-          <div class="list-header">
-            <h2>Danh sách Tài Khoản</h2>
-            <div class="list-stats">
-              <span id="accountCount">0</span> tài khoản
-            </div>
-          </div>
+					<!-- Divider -->
+					<div class="section-divider"></div>
 
-          <div id="accountsContainer" class="accounts-grid">
-            <div class="loading-state">
-              <div class="spinner"></div>
-              <p>Đang tải danh sách tài khoản...</p>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-  </div>
+					<!-- Accounts List Section -->
+					<section class="accounts-list-section">
+						<div class="list-header">
+							<h2>Danh sách Tài Khoản</h2>
+							<div class="list-stats">
+								<span id="accountCount">0</span> tài khoản
+							</div>
+						</div>
 
-  <!-- Modal: Thêm tài khoản -->
-  <div id="addAccountModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Thêm Tài Khoản Mới</h2>
-        <button class="close-btn" onclick="toggleModal('addAccountModal', false)">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="addAccountForm">
-          <div class="form-group">
-            <label for="modalJwtToken">JWT Token:</label>
-            <textarea id="modalJwtToken" rows="4" placeholder="Dán JWT Token của bạn tại đây..." required></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="toggleModal('addAccountModal', false)">Hủy</button>
-        <button class="btn-primary" onclick="submitAddAccount()">Thêm Tài Khoản</button>
-      </div>
-    </div>
-  </div>
+						<div id="accountsContainer" class="accounts-grid">
+							<div class="loading-state">
+								<div class="spinner"></div>
+								<p>Đang tải danh sách tài khoản...</p>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
 
-  <!-- Modal: Bulk Import -->
-  <div id="bulkImportModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Nhập JWT Token Hàng loạt</h2>
-        <button class="close-btn" onclick="toggleModal('bulkImportModal', false)">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="text-muted">Nhập một JWT Token trên mỗi dòng</p>
-        <textarea id="bulkTokensInput" rows="8" placeholder="eyJ0eXAiOiJKV1QiLCJhbGc...&#10;eyJ0eXAiOiJKV1QiLCJhbGc..."></textarea>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="toggleModal('bulkImportModal', false)">Hủy</button>
-        <button class="btn-primary" onclick="submitBulkImport()">Nhập Token</button>
-      </div>
-    </div>
-  </div>
+		<!-- Modal: Thêm tài khoản -->
+		<div id="addAccountModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Thêm Tài Khoản Mới</h2>
+					<button
+						class="close-btn"
+						onclick="toggleModal('addAccountModal', false)"
+					>
+						&times;
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="addAccountForm">
+						<div class="form-group">
+							<label for="modalJwtToken">JWT Token:</label>
+							<textarea
+								id="modalJwtToken"
+								rows="4"
+								placeholder="Dán JWT Token của bạn tại đây..."
+								required
+							></textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button
+						class="btn-secondary"
+						onclick="toggleModal('addAccountModal', false)"
+					>
+						Hủy
+					</button>
+					<button class="btn-primary" onclick="submitAddAccount()">
+						Thêm Tài Khoản
+					</button>
+				</div>
+			</div>
+		</div>
 
-  <!-- Modal: Xác nhận xóa -->
-  <div id="confirmDeleteModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Xác nhận xóa</h2>
-        <button class="close-btn" onclick="toggleModal('confirmDeleteModal', false)">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p>Bạn có chắc chắn muốn xóa tài khoản <strong id="deleteAccountName"></strong>?</p>
-        <p class="text-warning">Hành động này không thể hoàn tác!</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="toggleModal('confirmDeleteModal', false)">Hủy</button>
-        <button class="btn-danger" onclick="confirmDelete()">Xóa</button>
-      </div>
-    </div>
-  </div>
+		<!-- Modal: Bulk Import -->
+		<div id="bulkImportModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Nhập JWT Token Hàng loạt</h2>
+					<button
+						class="close-btn"
+						onclick="toggleModal('bulkImportModal', false)"
+					>
+						&times;
+					</button>
+				</div>
+				<div class="modal-body">
+					<p class="text-muted">Nhập một JWT Token trên mỗi dòng</p>
+					<textarea
+						id="bulkTokensInput"
+						rows="8"
+						placeholder="eyJ0eXAiOiJKV1QiLCJhbGc...&#10;eyJ0eXAiOiJKV1QiLCJhbGc..."
+					></textarea>
+				</div>
+				<div class="modal-footer">
+					<button
+						class="btn-secondary"
+						onclick="toggleModal('bulkImportModal', false)"
+					>
+						Hủy
+					</button>
+					<button class="btn-primary" onclick="submitBulkImport()">
+						Nhập Token
+					</button>
+				</div>
+			</div>
+		</div>
 
-  <script src="/js/shared.js"></script>
-  <script src="/js/api.js" type="module"></script>
-  <script src="/js/jwtParser.js" type="module"></script>
-  <script src="script.js" type="module"></script>
-</body>
+		<!-- Modal: Xác nhận xóa -->
+		<div id="confirmDeleteModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Xác nhận xóa</h2>
+					<button
+						class="close-btn"
+						onclick="toggleModal('confirmDeleteModal', false)"
+					>
+						&times;
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>
+						Bạn có chắc chắn muốn xóa tài khoản
+						<strong id="deleteAccountName"></strong>?
+					</p>
+					<p class="text-warning">
+						Hành động này không thể hoàn tác!
+					</p>
+				</div>
+				<div class="modal-footer">
+					<button
+						class="btn-secondary"
+						onclick="toggleModal('confirmDeleteModal', false)"
+					>
+						Hủy
+					</button>
+					<button class="btn-danger" onclick="confirmDelete()">
+						Xóa
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<script src="/js/shared.js"></script>
+		<script src="/js/api.js" type="module"></script>
+		<script src="/js/jwtParser.js" type="module"></script>
+		<script src="script.js" type="module"></script>
+	</body>
 </html>

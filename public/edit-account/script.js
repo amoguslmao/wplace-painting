@@ -1,331 +1,608 @@
-import { 
-  getAllAccounts,
-  updateAccount
-} from '/js/api.js';
+import { getAllAccounts, updateAccount } from "/js/api.js";
+import { getJWTExpiration, formatJWTExpiration } from "/js/jwtParser.js";
 
-// State
-let accountId = null;
-let currentAccount = null;
+const EditAccountManager = (() => {
+	let accountId = null;
+	let currentAccount = null;
 
-// Initialization
-document.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  accountId = parseInt(urlParams.get('id'));
+	const init = () => {
+		document.addEventListener("DOMContentLoaded", initializeEdit);
+	};
 
-  if (!accountId) {
-    showErrorState('Không tìm thấy ID tài khoản');
-    return;
-  }
+	const initializeEdit = () => {
+		const urlParams = new URLSearchParams(window.location.search);
+		accountId = parseInt(urlParams.get("id"));
 
-  loadAccount();
-});
+		if (!accountId) {
+			showErrorState("Không tìm thấy ID tài khoản");
+			return;
+		}
 
-/**
- * Load thông tin tài khoản
- */
-async function loadAccount() {
-  try {
-    const response = await getAllAccounts();
-    const accounts = response.data || [];
-    
-    currentAccount = accounts.find(acc => acc.id === accountId);
-    
-    if (!currentAccount) {
-      showErrorState('Không tìm thấy tài khoản này');
-      return;
-    }
+		loadAccount();
+	};
 
-    renderForm();
-  } catch (error) {
-    console.error('Error loading account:', error);
-    showErrorState('Lỗi khi tải thông tin tài khoản');
-  }
-}
+	/**
+	 * Load thông tin tài khoản
+	 */
+	const loadAccount = async () => {
+		try {
+			const response = await getAllAccounts();
+			const accounts = response || [];
 
-/**
- * Render form chỉnh sửa
- */
-function renderForm() {
-  const user = currentAccount.user;
-  const container = document.getElementById('editFormContainer');
+			currentAccount = accounts.find((acc) => acc.id === accountId);
 
-  // Update page title
-  document.getElementById('pageTitle').textContent = `Chỉnh sửa Tài Khoản: ${user.name}#${user.id}`;
+			if (!currentAccount) {
+				showErrorState("Không tìm thấy tài khoản này");
+				return;
+			}
 
-  const formHTML = `
-    <form id="editForm">
-      <!-- User Basic Info Section -->
-      <div class="form-section">
-        <h2>Thông tin cơ bản</h2>
-        
-        <div class="info-box">
-          <strong>Lưu ý:</strong> Một số trường dưới đây chỉ có thể xem, không thể chỉnh sửa. Những thay đổi sẽ được lưu vào cơ sở dữ liệu của server.
-        </div>
+			renderForm();
+		} catch (error) {
+			console.error("Error loading account:", error);
+			showErrorState("Lỗi khi tải thông tin tài khoản");
+		}
+	};
 
-        <div class="form-row">
-          <div class="form-group-readonly">
-            <label>Account ID</label>
-            <div class="value">${currentAccount.id}</div>
-          </div>
-          <div class="form-group-readonly">
-            <label>User ID</label>
-            <div class="value">${user.id}</div>
-          </div>
-        </div>
+	/**
+	 * Render form chỉnh sửa
+	 */
+	const renderForm = () => {
+		const user = currentAccount.user;
+		const container = document.getElementById("editFormContainer");
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="userName">Tên người dùng <span class="badge-readonly">Chỉ xem</span></label>
-            <input type="text" id="userName" value="${user.name}" disabled />
-          </div>
-          <div class="form-group">
-            <label for="userLevel">Level</label>
-            <input type="number" id="userLevel" value="${user.level}" step="0.001" />
-          </div>
-        </div>
+		if (!container) return;
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="pixelsPainted">Pixels Painted</label>
-            <input type="number" id="pixelsPainted" value="${user.pixelsPainted}" />
-          </div>
-          <div class="form-group">
-            <label for="droplets">Droplets</label>
-            <input type="number" id="droplets" value="${user.droplets}" />
-          </div>
-        </div>
+		// Update page title
+		const pageTitle = document.getElementById("pageTitle");
+		if (pageTitle) {
+			pageTitle.textContent = `Chỉnh sửa Tài Khoản: ${user.name}#${user.id}`;
+		}
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="country">Đất nước</label>
-            <input type="text" id="country" value="${user.country}" />
-          </div>
-          <div class="form-group">
-            <label for="discord">Discord</label>
-            <input type="text" id="discord" value="${user.discord}" />
-          </div>
-        </div>
-      </div>
+		container.innerHTML = "";
 
-      <!-- Charges Section -->
-      <div class="form-section">
-        <h2>Charges</h2>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label for="chargesCurrent">Charges Hiện tại</label>
-            <input type="number" id="chargesCurrent" value="${user.charges.count}" />
-          </div>
-          <div class="form-group">
-            <label for="chargesMax">Charges Tối đa</label>
-            <input type="number" id="chargesMax" value="${user.charges.max}" />
-          </div>
-          <div class="form-group">
-            <label for="chargesCooldown">Cooldown (ms)</label>
-            <input type="number" id="chargesCooldown" value="${user.charges.cooldownMs}" />
-          </div>
-        </div>
-      </div>
+		const form = document.createElement("form");
+		form.id = "editForm";
 
-      <!-- Alliance Section -->
-      <div class="form-section">
-        <h2>Alliance</h2>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label for="allianceId">Alliance ID</label>
-            <input type="number" id="allianceId" value="${user.allianceId || ''}" placeholder="Để trống nếu không thuộc alliance" />
-          </div>
-          <div class="form-group">
-            <label for="allianceRole">Alliance Role</label>
-            <select id="allianceRole">
-              <option value="">Không có</option>
-              <option value="admin" ${user.allianceRole === 'admin' ? 'selected' : ''}>Admin</option>
-              <option value="member" ${user.allianceRole === 'member' ? 'selected' : ''}>Member</option>
-            </select>
-          </div>
-        </div>
-      </div>
+		// Basic info section
+		const basicSection = createFormSection("Thông tin cơ bản", [
+			{
+				type: "info-box",
+				content:
+					"Một số trường dưới đây chỉ có thể xem, không thể chỉnh sửa. Những thay đổi sẽ được lưu vào cơ sở dữ liệu của server.",
+			},
+			{
+				type: "row",
+				fields: [
+					{
+						type: "readonly",
+						label: "Account ID",
+						value: currentAccount.id,
+					},
+					{
+						type: "readonly",
+						label: "User ID",
+						value: user.id,
+					},
+				],
+			},
+			{
+				type: "row",
+				fields: [
+					{
+						type: "text",
+						id: "userName",
+						label: "Tên người dùng",
+						value: user.name,
+						disabled: true,
+						badge: "Chỉ xem",
+					},
+					{
+						type: "number",
+						id: "userLevel",
+						label: "Level",
+						value: user.level,
+						step: 0.001,
+					},
+				],
+			},
+			{
+				type: "row",
+				fields: [
+					{
+						type: "number",
+						id: "pixelsPainted",
+						label: "Pixels Painted",
+						value: user.pixelsPainted,
+					},
+					{
+						type: "number",
+						id: "droplets",
+						label: "Droplets",
+						value: user.droplets,
+					},
+				],
+			},
+			{
+				type: "row",
+				fields: [
+					{
+						type: "text",
+						id: "country",
+						label: "Đất nước",
+						value: user.country,
+					},
+					{
+						type: "text",
+						id: "discord",
+						label: "Discord",
+						value: user.discord,
+					},
+				],
+			},
+		]);
+		form.appendChild(basicSection);
 
-      <!-- Other Info Section -->
-      <div class="form-section">
-        <h2>Thông tin khác</h2>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label for="role">Role</label>
-            <input type="text" id="role" value="${user.role}" />
-          </div>
-          <div class="form-group">
-            <label for="isCustomer">Loại tài khoản</label>
-            <select id="isCustomer">
-              <option value="false" ${!user.isCustomer ? 'selected' : ''}>Regular</option>
-              <option value="true" ${user.isCustomer ? 'selected' : ''}>Customer</option>
-            </select>
-          </div>
-        </div>
+		// Charges section
+		const chargesSection = createFormSection("Charges", [
+			{
+				type: "row",
+				fields: [
+					{
+						type: "number",
+						id: "chargesCurrent",
+						label: "Charges Hiện tại",
+						value: user.charges.count,
+					},
+					{
+						type: "number",
+						id: "chargesMax",
+						label: "Charges Tối đa",
+						value: user.charges.max,
+					},
+					{
+						type: "number",
+						id: "chargesCooldown",
+						label: "Cooldown (ms)",
+						value: user.charges.cooldownMs,
+					},
+				],
+			},
+		]);
+		form.appendChild(chargesSection);
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="showLastPixel">
-              <input type="checkbox" id="showLastPixel" ${user.showLastPixel ? 'checked' : ''} />
-              Hiển thị pixel cuối cùng
-            </label>
-          </div>
-          <div class="form-group">
-            <label for="needsPhoneVerification">
-              <input type="checkbox" id="needsPhoneVerification" ${user.needsPhoneVerification ? 'checked' : ''} />
-              Cần xác minh điện thoại
-            </label>
-          </div>
-        </div>
+		// Alliance section
+		const allianceSection = createFormSection("Alliance", [
+			{
+				type: "row",
+				fields: [
+					{
+						type: "number",
+						id: "allianceId",
+						label: "Alliance ID",
+						value: user.allianceId || "",
+						placeholder: "Để trống nếu không thuộc alliance",
+					},
+					{
+						type: "select",
+						id: "allianceRole",
+						label: "Alliance Role",
+						options: [
+							{ value: "", label: "Không có" },
+							{
+								value: "admin",
+								label: "Admin",
+								selected: user.allianceRole === "admin",
+							},
+							{
+								value: "member",
+								label: "Member",
+								selected: user.allianceRole === "member",
+							},
+						],
+					},
+				],
+			},
+		]);
+		form.appendChild(allianceSection);
 
-        ${user.suspensionReason ? `
-          <div class="form-row">
-            <div class="form-group">
-              <label for="suspensionReason">Lý do tạm ngưng</label>
-              <textarea id="suspensionReason" rows="3">${user.suspensionReason}</textarea>
-            </div>
-          </div>
-        ` : ''}
-      </div>
+		// Other info section
+		const otherSection = createFormSection("Thông tin khác", [
+			{
+				type: "row",
+				fields: [
+					{
+						type: "text",
+						id: "role",
+						label: "Role",
+						value: user.role,
+					},
+					{
+						type: "select",
+						id: "isCustomer",
+						label: "Loại tài khoản",
+						options: [
+							{
+								value: "false",
+								label: "Regular",
+								selected: !user.isCustomer,
+							},
+							{
+								value: "true",
+								label: "Customer",
+								selected: user.isCustomer,
+							},
+						],
+					},
+				],
+			},
+			{
+				type: "row",
+				fields: [
+					{
+						type: "checkbox",
+						id: "showLastPixel",
+						label: "Hiển thị pixel cuối cùng",
+						checked: user.showLastPixel,
+					},
+					{
+						type: "checkbox",
+						id: "needsPhoneVerification",
+						label: "Cần xác minh điện thoại",
+						checked: user.needsPhoneVerification,
+					},
+				],
+			},
+			...(user.suspensionReason
+				? [
+						{
+							type: "row",
+							fields: [
+								{
+									type: "textarea",
+									id: "suspensionReason",
+									label: "Lý do tạm ngưng",
+									value: user.suspensionReason,
+									rows: 3,
+								},
+							],
+						},
+					]
+				: []),
+		]);
+		form.appendChild(otherSection);
 
-      <!-- Read-only Info -->
-      <div class="form-section">
-        <h2>Thông tin hệ thống (Chỉ xem)</h2>
-        
-        <div class="form-row">
-          <div class="form-group-readonly">
-            <label>Token Hết hạn</label>
-            <div class="value">${new Date(currentAccount.jwtToken !== 'hidden' ? 
-              currentAccount.jwtToken : 
-              user.timeoutUntil).toLocaleString('vi-VN')}</div>
-          </div>
-          <div class="form-group-readonly">
-            <label>Timeout Until</label>
-            <div class="value">${new Date(user.timeoutUntil).toLocaleString('vi-VN')}</div>
-          </div>
-        </div>
+		// System info section
+		const systemSection = createFormSection(
+			"Thông tin hệ thống (Chỉ xem)",
+			[
+				{
+					type: "row",
+					fields: [
+						{
+							type: "readonly",
+							label: "Token Hết hạn",
+							// value: new Date(
+							// 	currentAccount.jwtToken !== "hidden"
+							// 		? currentAccount.jwtToken
+							// 		: user.timeoutUntil,
+							// ).toLocaleString("vi-VN"),
+							value: formatJWTExpiration(currentAccount.jwtToken)
+						},
+						{
+							type: "readonly",
+							label: "Timeout Until",
+							value: new Date(user.timeoutUntil).toLocaleString(
+								"vi-VN",
+							),
+						},
+					],
+				},
+				{
+					type: "row",
+					fields: [
+						{
+							type: "readonly",
+							label: "Last Fetch",
+							value: new Date(
+								currentAccount.lastFetch,
+							).toLocaleString("vi-VN"),
+						},
+					],
+				},
+			],
+		);
+		form.appendChild(systemSection);
 
-        <div class="form-row">
-          <div class="form-group-readonly">
-            <label>Last Fetch</label>
-            <div class="value">${new Date(currentAccount.lastFetch * 1000).toLocaleString('vi-VN')}</div>
-          </div>
-        </div>
-      </div>
+		// Form actions
+		const actionsDiv = document.createElement("div");
+		actionsDiv.className = "form-actions";
 
-      <!-- Form Actions -->
-      <div class="form-actions">
-        <button type="button" class="btn-secondary" onclick="window.history.back()">Hủy</button>
-        <button type="button" class="btn-primary" onclick="validateAndSave()">Lưu thay đổi</button>
-      </div>
-    </form>
-  `;
+		const cancelBtn = document.createElement("button");
+		cancelBtn.type = "button";
+		cancelBtn.className = "btn-secondary";
+		cancelBtn.textContent = "Hủy";
+		cancelBtn.addEventListener("click", () => window.history.back());
 
-  container.innerHTML = formHTML;
-}
+		const saveBtn = document.createElement("button");
+		saveBtn.type = "button";
+		saveBtn.className = "btn-primary";
+		saveBtn.textContent = "Lưu thay đổi";
+		saveBtn.addEventListener("click", validateAndSave);
 
-/**
- * Validate và lưu thay đổi
- */
-function validateAndSave() {
-  // Validate dữ liệu
-  const level = parseFloat(document.getElementById('userLevel').value);
-  const pixelsPainted = parseInt(document.getElementById('pixelsPainted').value);
-  const droplets = parseInt(document.getElementById('droplets').value);
-  const chargesCurrent = parseInt(document.getElementById('chargesCurrent').value);
-  const chargesMax = parseInt(document.getElementById('chargesMax').value);
+		actionsDiv.appendChild(cancelBtn);
+		actionsDiv.appendChild(saveBtn);
 
-  if (isNaN(level) || level < 0) {
-    showNotification('Level phải là số dương', 'warning');
-    return;
-  }
+		form.appendChild(actionsDiv);
 
-  if (isNaN(pixelsPainted) || pixelsPainted < 0) {
-    showNotification('Pixels Painted phải là số dương', 'warning');
-    return;
-  }
+		container.appendChild(form);
+	};
 
-  if (isNaN(droplets) || droplets < 0) {
-    showNotification('Droplets phải là số dương', 'warning');
-    return;
-  }
+	/**
+	 * Create form section
+	 */
+	const createFormSection = (title, fields) => {
+		const section = document.createElement("div");
+		section.className = "form-section";
 
-  if (isNaN(chargesCurrent) || chargesCurrent < 0) {
-    showNotification('Charges Current phải là số dương', 'warning');
-    return;
-  }
+		const heading = document.createElement("h2");
+		heading.textContent = title;
+		section.appendChild(heading);
 
-  if (isNaN(chargesMax) || chargesMax < 0) {
-    showNotification('Charges Max phải là số dương', 'warning');
-    return;
-  }
+		fields.forEach((field) => {
+			if (field.type === "info-box") {
+				const infoBox = document.createElement("div");
+				infoBox.className = "info-box";
+				infoBox.innerHTML = `<strong>Lưu ý:</strong> ${field.content}`;
+				section.appendChild(infoBox);
+			} else if (field.type === "row") {
+				const row = document.createElement("div");
+				row.className = "form-row";
 
-  if (chargesCurrent > chargesMax) {
-    showNotification('Charges Current không thể vượt quá Charges Max', 'warning');
-    return;
-  }
+				field.fields.forEach((fieldDef) => {
+					const group = createFormGroup(fieldDef);
+					row.appendChild(group);
+				});
 
-  // Mở modal xác nhận
-  toggleModal('confirmSaveModal', true);
-}
+				section.appendChild(row);
+			}
+		});
 
-/**
- * Submit thay đổi
- */
-async function submitChanges() {
-  try {
-    toggleModal('confirmSaveModal', false);
-    showNotification('Đang lưu thay đổi...', 'info');
+		return section;
+	};
 
-    // Collect form data
-    const updateData = {
-      level: parseFloat(document.getElementById('userLevel').value),
-      pixelsPainted: parseInt(document.getElementById('pixelsPainted').value),
-      droplets: parseInt(document.getElementById('droplets').value),
-      country: document.getElementById('country').value,
-      discord: document.getElementById('discord').value,
-      role: document.getElementById('role').value,
-      isCustomer: document.getElementById('isCustomer').value === 'true',
-      showLastPixel: document.getElementById('showLastPixel').checked,
-      needsPhoneVerification: document.getElementById('needsPhoneVerification').checked,
-      allianceId: document.getElementById('allianceId').value ? 
-        parseInt(document.getElementById('allianceId').value) : null,
-      allianceRole: document.getElementById('allianceRole').value || null,
-      charges: {
-        current: parseInt(document.getElementById('chargesCurrent').value),
-        max: parseInt(document.getElementById('chargesMax').value),
-        cooldownMs: parseInt(document.getElementById('chargesCooldown').value),
-      },
-    };
+	/**
+	 * Create form group
+	 */
+	const createFormGroup = (fieldDef) => {
+		const group = document.createElement("div");
 
-    if (currentAccount.user.suspensionReason && document.getElementById('suspensionReason')) {
-      updateData.suspensionReason = document.getElementById('suspensionReason').value;
-    }
+		if (fieldDef.type === "readonly") {
+			group.className = "form-group-readonly";
+			const label = document.createElement("label");
+			label.textContent = fieldDef.label;
+			const value = document.createElement("div");
+			value.className = "value";
+			value.textContent = fieldDef.value;
+			group.appendChild(label);
+			group.appendChild(value);
+		} else if (fieldDef.type === "checkbox") {
+			group.className = "form-group";
+			const label = document.createElement("label");
+			const checkbox = document.createElement("input");
+			checkbox.type = "checkbox";
+			checkbox.id = fieldDef.id;
+			if (fieldDef.checked) checkbox.checked = true;
+			label.appendChild(checkbox);
+			label.appendChild(document.createTextNode(fieldDef.label));
+			group.appendChild(label);
+		} else if (fieldDef.type === "select") {
+			group.className = "form-group";
+			const label = document.createElement("label");
+			label.htmlFor = fieldDef.id;
+			label.textContent = fieldDef.label;
+			const select = document.createElement("select");
+			select.id = fieldDef.id;
+			fieldDef.options.forEach((opt) => {
+				const option = document.createElement("option");
+				option.value = opt.value;
+				option.textContent = opt.label;
+				if (opt.selected) option.selected = true;
+				select.appendChild(option);
+			});
+			group.appendChild(label);
+			group.appendChild(select);
+		} else if (fieldDef.type === "textarea") {
+			group.className = "form-group";
+			const label = document.createElement("label");
+			label.htmlFor = fieldDef.id;
+			label.textContent = fieldDef.label;
+			const textarea = document.createElement("textarea");
+			textarea.id = fieldDef.id;
+			textarea.rows = fieldDef.rows || 4;
+			textarea.value = fieldDef.value || "";
+			group.appendChild(label);
+			group.appendChild(textarea);
+		} else {
+			// text, number, email, etc.
+			group.className = "form-group";
+			const label = document.createElement("label");
+			label.htmlFor = fieldDef.id;
+			label.textContent = fieldDef.label;
+			if (fieldDef.badge) {
+				const badge = document.createElement("span");
+				badge.className = "badge-readonly";
+				badge.textContent = fieldDef.badge;
+				label.appendChild(badge);
+			}
+			const input = document.createElement("input");
+			input.type = fieldDef.type || "text";
+			input.id = fieldDef.id;
+			input.value = fieldDef.value || "";
+			if (fieldDef.placeholder) input.placeholder = fieldDef.placeholder;
+			if (fieldDef.disabled) input.disabled = true;
+			if (fieldDef.step) input.step = fieldDef.step;
+			group.appendChild(label);
+			group.appendChild(input);
+		}
 
-    const response = await updateAccount(accountId, updateData);
-    showNotification('Thay đổi đã được lưu thành công!', 'success');
-    
-    setTimeout(() => {
-      window.location.href = '/accounts/';
-    }, 1500);
-  } catch (error) {
-    console.error('Error saving changes:', error);
-    showNotification(error.message || 'Lỗi khi lưu thay đổi', 'danger');
-  }
-}
+		return group;
+	};
 
-/**
- * Show error state
- */
-function showErrorState(message) {
-  const container = document.getElementById('editFormContainer');
-  container.innerHTML = `
-    <div class="error-state">
-      <div class="emoji">❌</div>
-      <p>${message}</p>
-      <a href="/accounts/" class="btn-secondary" style="display: inline-block; margin-top: 1rem;">Quay lại danh sách</a>
-    </div>
-  `;
-}
+	/**
+	 * Validate và lưu thay đổi
+	 */
+	const validateAndSave = () => {
+		// Validate dữ liệu
+		const level = parseFloat(document.getElementById("userLevel").value);
+		const pixelsPainted = parseInt(
+			document.getElementById("pixelsPainted").value,
+		);
+		const droplets = parseInt(document.getElementById("droplets").value);
+		const chargesCurrent = parseInt(
+			document.getElementById("chargesCurrent").value,
+		);
+		const chargesMax = parseInt(
+			document.getElementById("chargesMax").value,
+		);
+
+		if (isNaN(level) || level < 0) {
+			showNotification("Level phải là số dương", "warning");
+			return;
+		}
+
+		if (isNaN(pixelsPainted) || pixelsPainted < 0) {
+			showNotification("Pixels Painted phải là số dương", "warning");
+			return;
+		}
+
+		if (isNaN(droplets) || droplets < 0) {
+			showNotification("Droplets phải là số dương", "warning");
+			return;
+		}
+
+		if (isNaN(chargesCurrent) || chargesCurrent < 0) {
+			showNotification("Charges Current phải là số dương", "warning");
+			return;
+		}
+
+		if (isNaN(chargesMax) || chargesMax < 0) {
+			showNotification("Charges Max phải là số dương", "warning");
+			return;
+		}
+
+		if (chargesCurrent > chargesMax) {
+			showNotification(
+				"Charges Current không thể vượt quá Charges Max",
+				"warning",
+			);
+			return;
+		}
+
+		// Mở modal xác nhận
+		toggleModal("confirmSaveModal", true);
+	};
+
+	/**
+	 * Submit thay đổi
+	 */
+	const submitChanges = async () => {
+		try {
+			toggleModal("confirmSaveModal", false);
+			showNotification("Đang lưu thay đổi...", "info");
+
+			// Collect form data
+			const updateData = {
+				level: parseFloat(document.getElementById("userLevel").value),
+				pixelsPainted: parseInt(
+					document.getElementById("pixelsPainted").value,
+				),
+				droplets: parseInt(document.getElementById("droplets").value),
+				country: document.getElementById("country").value,
+				discord: document.getElementById("discord").value,
+				role: document.getElementById("role").value,
+				isCustomer:
+					document.getElementById("isCustomer").value === "true",
+				showLastPixel: document.getElementById("showLastPixel").checked,
+				needsPhoneVerification: document.getElementById(
+					"needsPhoneVerification",
+				).checked,
+				allianceId: document.getElementById("allianceId").value
+					? parseInt(document.getElementById("allianceId").value)
+					: null,
+				allianceRole:
+					document.getElementById("allianceRole").value || null,
+				charges: {
+					current: parseInt(
+						document.getElementById("chargesCurrent").value,
+					),
+					max: parseInt(document.getElementById("chargesMax").value),
+					cooldownMs: parseInt(
+						document.getElementById("chargesCooldown").value,
+					),
+				},
+			};
+
+			if (
+				currentAccount.user.suspensionReason &&
+				document.getElementById("suspensionReason")
+			) {
+				updateData.suspensionReason =
+					document.getElementById("suspensionReason").value;
+			}
+
+			const response = await updateAccount(accountId, updateData);
+			showNotification("Thay đổi đã được lưu thành công!", "success");
+
+			setTimeout(() => {
+				window.location.href = "/accounts/";
+			}, 1500);
+		} catch (error) {
+			console.error("Error saving changes:", error);
+			showNotification(error.message || "Lỗi khi lưu thay đổi", "danger");
+		}
+	};
+
+	/**
+	 * Show error state
+	 */
+	const showErrorState = (message) => {
+		const container = document.getElementById("editFormContainer");
+
+		if (!container) return;
+
+		container.innerHTML = "";
+
+		const errorDiv = document.createElement("div");
+		errorDiv.className = "error-state";
+
+		const emoji = document.createElement("div");
+		emoji.className = "emoji";
+		emoji.textContent = "❌";
+
+		const text = document.createElement("p");
+		text.textContent = message;
+
+		const link = document.createElement("a");
+		link.href = "/accounts/";
+		link.className = "btn-secondary";
+		link.style.display = "inline-block";
+		link.style.marginTop = "1rem";
+		link.textContent = "Quay lại danh sách";
+
+		errorDiv.appendChild(emoji);
+		errorDiv.appendChild(text);
+		errorDiv.appendChild(link);
+
+		container.appendChild(errorDiv);
+	};
+
+	return {
+		init,
+		submitChanges,
+	};
+})();
+
+EditAccountManager.init();
+
+// Export to global scope for inline onclick handlers
+window.submitChanges = EditAccountManager.submitChanges;

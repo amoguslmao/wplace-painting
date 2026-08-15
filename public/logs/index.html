@@ -1,92 +1,164 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Real-time Logs - wplace-painting</title>
-  <link rel="stylesheet" href="/css/shared.css">
-  <link rel="stylesheet" href="/css/header.css">
-  <link rel="stylesheet" href="/css/footer.css">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <div class="main-content">
-      <div class="logs-container">
-        <h1>Real-time Logs</h1>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Real-time Logs - wplace-painting</title>
+		<link rel="stylesheet" href="/css/shared.css" />
+		<link rel="stylesheet" href="/css/header.css" />
+		<link rel="stylesheet" href="/css/footer.css" />
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="main-content">
+				<div class="logs-container">
+					<h1>Real-time Logs</h1>
 
-        <!-- Controls Section -->
-        <div class="logs-controls">
-          <div class="control-group">
-            <label for="fetchInterval">Fetch Interval (giây):</label>
-            <input type="number" id="fetchInterval" min="1" max="60" value="5" />
-            <button class="btn-secondary btn-sm" onclick="updateFetchInterval()">Cập nhật</button>
-          </div>
+					<!-- Controls Section -->
+					<div class="logs-controls">
+						<div class="control-group">
+							<label for="fetchInterval"
+								>Fetch Interval (giây):</label
+							>
+							<input
+								type="number"
+								id="fetchInterval"
+								min="1"
+								max="60"
+								value="5"
+							/>
+							<button
+								class="btn-secondary btn-sm"
+								onclick="updateFetchInterval()"
+							>
+								Cập nhật
+							</button>
+						</div>
 
-          <div class="control-group">
-            <label for="logsLimit">Số lượng logs:</label>
-            <input type="number" id="logsLimit" min="10" max="500" value="100" />
-            <button class="btn-secondary btn-sm" onclick="updateLogsLimit()">Cập nhật</button>
-          </div>
+						<div class="control-group">
+							<label for="logsLimit">Số lượng logs:</label>
+							<input
+								type="number"
+								id="logsLimit"
+								min="10"
+								max="500"
+								value="100"
+							/>
+							<button
+								class="btn-secondary btn-sm"
+								onclick="updateLogsLimit()"
+							>
+								Cập nhật
+							</button>
+						</div>
 
-          <div class="control-group">
-            <button class="btn-info btn-sm" onclick="toggleAutoRefresh()">
-              <span id="autoRefreshStatus">🔴 Tắt Auto Refresh</span>
-            </button>
-            <button class="btn-primary btn-sm" onclick="fetchLogsNow()">🔄 Fetch Ngay</button>
-            <button class="btn-danger btn-sm" onclick="clearLogs()">🗑️ Xóa Logs</button>
-          </div>
+						<div class="control-group">
+							<button
+								class="btn-info btn-sm"
+								onclick="toggleAutoRefresh()"
+							>
+								<span id="autoRefreshStatus"
+									>🔴 Tắt Auto Refresh</span
+								>
+							</button>
+							<button
+								class="btn-primary btn-sm"
+								onclick="fetchLogsNow()"
+							>
+								🔄 Fetch Ngay
+							</button>
+							<button
+								class="btn-danger btn-sm"
+								onclick="clearLogs()"
+							>
+								🗑️ Xóa Logs
+							</button>
+						</div>
 
-          <div class="control-group">
-            <label for="filterLevel">Lọc theo Level:</label>
-            <select id="filterLevel" onchange="applyFilters()">
-              <option value="">Tất cả</option>
-              <option value="error">Error</option>
-              <option value="warning">Warning</option>
-              <option value="info">Info</option>
-              <option value="debug">Debug</option>
-            </select>
-          </div>
+						<div class="control-group">
+							<label for="filterLevel">Lọc theo Level:</label>
+							<select id="filterLevel" onchange="applyFilters()">
+								<option value="">Tất cả</option>
+								<option value="error">Error</option>
+								<option value="warning">Warning</option>
+								<option value="info">Info</option>
+								<option value="debug">Debug</option>
+							</select>
+						</div>
 
-          <div class="log-stats">
-            <span>Tổng logs: <strong id="totalLogsCount">0</strong></span>
-            <span>Đang tải: <span id="loadingIndicator" class="text-muted">Tắt</span></span>
-            <span>Cập nhật: <strong id="lastUpdateTime">Chưa cập nhật</strong></span>
-          </div>
-        </div>
+						<div class="log-stats">
+							<span
+								>Tổng logs:
+								<strong id="totalLogsCount">0</strong></span
+							>
+							<span
+								>Đang tải:
+								<span id="loadingIndicator" class="text-muted"
+									>Tắt</span
+								></span
+							>
+							<span
+								>Cập nhật:
+								<strong id="lastUpdateTime"
+									>Chưa cập nhật</strong
+								></span
+							>
+						</div>
+					</div>
 
-        <!-- Logs Display Section -->
-        <div class="logs-wrapper">
-          <div id="logsContainer" class="logs-content">
-            <div class="empty-state">
-              <div class="emoji">📋</div>
-              <p>Chưa có logs</p>
-              <p class="text-muted">Nhấn "Fetch Ngay" để tải logs hoặc bật Auto Refresh</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+					<!-- Logs Display Section -->
+					<div class="logs-wrapper">
+						<div id="logsContainer" class="logs-content">
+							<div class="empty-state">
+								<div class="emoji">📋</div>
+								<p>Chưa có logs</p>
+								<p class="text-muted">
+									Nhấn "Fetch Ngay" để tải logs hoặc bật Auto
+									Refresh
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-  <!-- Modal: Log Detail -->
-  <div id="logDetailModal" class="modal">
-    <div class="modal-content large">
-      <div class="modal-header">
-        <h2>Chi tiết Log</h2>
-        <button class="close-btn" onclick="toggleModal('logDetailModal', false)">&times;</button>
-      </div>
-      <div class="modal-body" id="logDetailContent">
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="toggleModal('logDetailModal', false); copyLogContent()">📋 Copy</button>
-        <button class="btn-secondary" onclick="toggleModal('logDetailModal', false)">Đóng</button>
-      </div>
-    </div>
-  </div>
+		<!-- Modal: Log Detail -->
+		<div id="logDetailModal" class="modal">
+			<div class="modal-content large">
+				<div class="modal-header">
+					<h2>Chi tiết Log</h2>
+					<button
+						class="close-btn"
+						onclick="toggleModal('logDetailModal', false)"
+					>
+						&times;
+					</button>
+				</div>
+				<div class="modal-body" id="logDetailContent"></div>
+				<div class="modal-footer">
+					<button
+						class="btn-secondary"
+						onclick="
+							toggleModal('logDetailModal', false);
+							copyLogContent();
+						"
+					>
+						📋 Copy
+					</button>
+					<button
+						class="btn-secondary"
+						onclick="toggleModal('logDetailModal', false)"
+					>
+						Đóng
+					</button>
+				</div>
+			</div>
+		</div>
 
-  <script src="/js/shared.js"></script>
-  <script src="/js/api.js" type="module"></script>
-  <script src="script.js" type="module"></script>
-</body>
+		<script src="/js/shared.js"></script>
+		<script src="/js/api.js" type="module"></script>
+		<script src="script.js" type="module"></script>
+	</body>
 </html>
