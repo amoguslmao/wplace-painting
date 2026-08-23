@@ -4,22 +4,25 @@ import { AccountManager } from "../../../services/accountManager.js";
 import { sleep } from "../../../utils/promises.js";
 import { sendSSE } from "../../../utils/string.js";
 
-export default async function bulkPurchaseFlags(req: Request<{}, {}, BulkPurchaseFlags>, res: Response) {
+export default async function bulkPurchaseFlags(
+	req: Request<{}, {}, BulkPurchaseFlags>,
+	res: Response,
+) {
 	if (!req.body.ids) {
 		return res.status(400).json({
-			message: "Field 'ids' is required"
+			message: "Field 'ids' is required",
 		});
 	}
 
 	if (!Array.isArray(req.body.ids)) {
 		return res.status(400).json({
-			message: `Field "ids" must be an array`
+			message: `Field "ids" must be an array`,
 		});
 	}
 
 	if (!req.body.flagId) {
 		return res.status(400).json({
-			message: `Field "flagId" is required.`
+			message: `Field "flagId" is required.`,
 		});
 	}
 
@@ -43,10 +46,13 @@ export default async function bulkPurchaseFlags(req: Request<{}, {}, BulkPurchas
 
 		if (!account) {
 			res.write(
-				sendSSE(JSON.stringify({
-					message: `Could not find account with ID ${accountId}`,
-					accountId
-				}), "error")
+				sendSSE(
+					JSON.stringify({
+						message: `Could not find account with ID ${accountId}`,
+						accountId,
+					}),
+					"error",
+				),
 			);
 			continue;
 		}
@@ -56,26 +62,35 @@ export default async function bulkPurchaseFlags(req: Request<{}, {}, BulkPurchas
 
 			if (result.status === "success") {
 				res.write(
-					sendSSE(JSON.stringify({
-						message: result.message,
-						accountId
-					}), "success")
+					sendSSE(
+						JSON.stringify({
+							message: result.message,
+							accountId,
+						}),
+						"success",
+					),
 				);
 			} else {
 				res.write(
-					sendSSE(JSON.stringify({
-						message: result.message,
-						accountId
-					}), "failed")
+					sendSSE(
+						JSON.stringify({
+							message: result.message,
+							accountId,
+						}),
+						"failed",
+					),
 				);
 			}
 		} catch (error) {
 			res.write(
-				sendSSE(JSON.stringify({
-					message: `An error occurred while purchasing flag for account ID ${accountId}`,
-					cause: (error as Error).message,
-					accountId
-				}), "error")
+				sendSSE(
+					JSON.stringify({
+						message: `An error occurred while purchasing flag for account ID ${accountId}`,
+						cause: (error as Error).message,
+						accountId,
+					}),
+					"error",
+				),
 			);
 		}
 	}

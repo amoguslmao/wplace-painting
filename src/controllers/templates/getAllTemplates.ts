@@ -8,13 +8,13 @@ export default async function getAllTemplates(_: Request, res: Response) {
 	const { templates } = templateManager;
 
 	const result: {
-		id: number,
-		name: string,
-		createdAt: string,
-		imageName: string,
+		id: number;
+		name: string;
+		createdAt: string;
+		imageName: string;
 
-		totalAccounts: number,
-		coordinates: TemplateCoordinates
+		totalAccounts: number;
+		coordinates: TemplateCoordinates;
 	}[] = [];
 
 	for (const template of templates.values()) {
@@ -25,7 +25,7 @@ export default async function getAllTemplates(_: Request, res: Response) {
 			imageName: template.imageName,
 
 			totalAccounts: template.assignedAccounts.length,
-			coordinates: template.coordinates
+			coordinates: template.coordinates,
 		});
 	}
 

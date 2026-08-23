@@ -1,35 +1,35 @@
-import type { TemplateInformation } from "./template.js"
+import type { TemplateInformation } from "./template.js";
 
 export interface NeedJwtToken {
-	tokens: string[]
+	tokens: string[];
 }
 
 export interface IdParam {
-	id: string // Express khi parse param thì nó trả về string
+	id: string; // Express khi parse param thì nó trả về string
 }
 
 export interface RenameUser {
-	name: string
+	name: string;
 }
 
 export interface JoinAlliance {
-	allianceUUID: string
+	allianceUUID: string;
 }
 
 export interface BulkAccountAction {
-	ids: number[]
+	ids: number[];
 }
 
 export interface PurchaseCharges {
-	type: "paint_charge" | "max_charge",
-	amount: number
+	type: "paint_charge" | "max_charge";
+	amount: number;
 }
 
 export interface PurchaseFlags {
-	flagId: number
+	flagId: number;
 }
 
-export type BulkJoinAlliance =  BulkAccountAction & JoinAlliance;
+export type BulkJoinAlliance = BulkAccountAction & JoinAlliance;
 
 export type BulkFetchUser = BulkAccountAction;
 
@@ -41,4 +41,7 @@ export type BulkPurchaseFlags = BulkAccountAction & PurchaseFlags;
 
 export type AddNewTemplate = Omit<TemplateInformation, "id" | "createdAt">;
 
-export type UpdateTemplate = Omit<TemplateInformation, "id" | "createdAt" | "imageName" | "imageInformation">;
+export type UpdateTemplate = Omit<
+	TemplateInformation,
+	"id" | "createdAt" | "imageName" | "imageInformation"
+>;

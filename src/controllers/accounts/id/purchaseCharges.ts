@@ -2,7 +2,10 @@ import type { Request, Response } from "express";
 import type { IdParam, PurchaseCharges } from "../../../types/request.js";
 import { AccountManager } from "../../../services/accountManager.js";
 
-export default async function purchaseChargesUser(req: Request<IdParam, {}, PurchaseCharges>, res: Response) {
+export default async function purchaseChargesUser(
+	req: Request<IdParam, {}, PurchaseCharges>,
+	res: Response,
+) {
 	const accountId = Number(req.params.id);
 
 	const accountManager = AccountManager.getInstance();
@@ -11,7 +14,7 @@ export default async function purchaseChargesUser(req: Request<IdParam, {}, Purc
 
 	if (!account) {
 		return res.status(400).json({
-			message: `Could not find account with ID ${req.params.id}`
+			message: `Could not find account with ID ${req.params.id}`,
 		});
 	}
 
@@ -19,13 +22,13 @@ export default async function purchaseChargesUser(req: Request<IdParam, {}, Purc
 
 	if (!Number.isInteger(amount)) {
 		return res.status(400).json({
-			message: `Field "amount" must be an integer`
+			message: `Field "amount" must be an integer`,
 		});
 	}
 
 	if (!["paint_charge", "max_charge"].includes(type)) {
 		return res.status(400).json({
-			message: `Field "type" can only has two values are 'paint_charge' and 'max_charge'`
+			message: `Field "type" can only has two values are 'paint_charge' and 'max_charge'`,
 		});
 	}
 
@@ -34,18 +37,18 @@ export default async function purchaseChargesUser(req: Request<IdParam, {}, Purc
 
 		if (result.status === "success") {
 			res.status(200).json({
-				message: result.message
+				message: result.message,
 			});
 		}
 		else {
 			res.status(400).json({
-				message: result.message
+				message: result.message,
 			});
 		}
 	} catch (error) {
 		res.status(500).json({
 			message: "Got an error when purchase charge",
-			cause: (error as Error).message
+			cause: (error as Error).message,
 		});
 	}
 }

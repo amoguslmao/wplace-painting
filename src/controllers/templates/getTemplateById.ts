@@ -2,7 +2,10 @@ import type { Request, Response } from "express";
 import { TemplateManager } from "../../services/templateManager.js";
 import type { IdParam } from "../../types/request.js";
 
-export default async function getTemplateById(req: Request<IdParam>, res: Response) {
+export default async function getTemplateById(
+	req: Request<IdParam>,
+	res: Response,
+) {
 	const templateId = Number(req.params.id);
 
 	const templateManager = TemplateManager.getInstance();
@@ -11,7 +14,7 @@ export default async function getTemplateById(req: Request<IdParam>, res: Respon
 
 	if (!template) {
 		return res.status(404).json({
-			message: `Could not find template with ID ${req.params.id}`
+			message: `Could not find template with ID ${req.params.id}`,
 		});
 	}
 
@@ -24,6 +27,6 @@ export default async function getTemplateById(req: Request<IdParam>, res: Respon
 		imageInformation: template.imageInformation,
 		assignedAccounts: template.assignedAccounts,
 		coordinates: template.coordinates,
-		setting: template.setting
+		setting: template.setting,
 	});
 }

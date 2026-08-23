@@ -2,7 +2,10 @@ import type { Request, Response } from "express";
 import { AccountManager } from "../../../services/accountManager.js";
 import type { IdParam } from "../../../types/request.js";
 
-export default async function leaveAlliance(req: Request<IdParam>, res: Response) {
+export default async function leaveAlliance(
+	req: Request<IdParam>,
+	res: Response,
+) {
 	const accountId = Number(req.params.id);
 
 	const accountManager = AccountManager.getInstance();
@@ -11,7 +14,7 @@ export default async function leaveAlliance(req: Request<IdParam>, res: Response
 
 	if (!account) {
 		return res.status(404).json({
-			message: `Could not find account with ID ${accountId}`
+			message: `Could not find account with ID ${accountId}`,
 		});
 	}
 
@@ -20,17 +23,17 @@ export default async function leaveAlliance(req: Request<IdParam>, res: Response
 
 		if (result.status === "success") {
 			res.status(200).json({
-				message: result.message
+				message: result.message,
 			});
 		} else {
 			res.status(400).json({
-				message: result.message
+				message: result.message,
 			});
 		}
 	} catch (error) {
 		res.status(500).json({
 			message: `An error occurred while leaving alliance for account ID ${accountId}`,
-			cause: error
+			cause: error,
 		});
 
 		console.error(error);

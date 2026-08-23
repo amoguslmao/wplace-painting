@@ -41,7 +41,7 @@ export class Logger {
 		const prefix = [chalk.gray(time), color(icon), color(namespaces)]
 			.filter(Boolean)
 			.join(" ");
-		
+
 		console.log(prefix, ...args);
 	}
 
@@ -54,22 +54,22 @@ export class Logger {
 	private formatNamespace() {
 		if (this.namespace.length === 0) return "";
 
-		return this.namespace
-			.map(ns => `[${this.captalize(ns)}]`)
-			.join(" ");
+		return this.namespace.map((ns) => `[${this.captalize(ns)}]`).join(" ");
 	}
 
 	private getTime() {
 		const date = new Date();
 
-		return date.toLocaleString("en-US", {
-			year: "numeric",
-			month: "2-digit",
-			day: "2-digit",
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-			hour12: false
-		}).replace(/,/g, "");
+		return date
+			.toLocaleString("en-US", {
+				year: "numeric",
+				month: "2-digit",
+				day: "2-digit",
+				hour: "2-digit",
+				minute: "2-digit",
+				second: "2-digit",
+				hour12: false,
+			})
+			.replace(/,/g, "");
 	}
 }

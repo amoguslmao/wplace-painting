@@ -3,7 +3,10 @@ import type { IdParam } from "../../types/request.js";
 import { TemplateManager } from "../../services/templateManager.js";
 import { AccountManager } from "../../services/accountManager.js";
 
-export default function getAssignedAccountsById(req: Request<IdParam>, res: Response) {
+export default function getAssignedAccountsById(
+	req: Request<IdParam>,
+	res: Response,
+) {
 	const templateId = Number(req.params.id);
 
 	const templateManager = TemplateManager.getInstance();
@@ -13,7 +16,7 @@ export default function getAssignedAccountsById(req: Request<IdParam>, res: Resp
 
 	if (!template) {
 		return res.status(404).json({
-			message: `Could not find template with ID ${templateId}`
+			message: `Could not find template with ID ${templateId}`,
 		});
 	}
 
@@ -24,10 +27,12 @@ export default function getAssignedAccountsById(req: Request<IdParam>, res: Resp
 
 		if (!account) {
 			// chắc là gió thôi
-			console.error(`Found unknown account with ID ${accountId} when get all assigned account in template ${template.name}#${template.id}`);
+			console.error(
+				`Found unknown account with ID ${accountId} when get all assigned account in template ${template.name}#${template.id}`,
+			);
 			continue;
 		}
-		
+
 		result.push(`${account.user.name}#${account.user.id}`);
 	}
 

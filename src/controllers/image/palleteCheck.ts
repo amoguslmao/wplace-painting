@@ -3,10 +3,13 @@ import { ImageManiputation } from "../../libs/imageManiputation.js";
 import { matchingPallete } from "../../libs/color.js";
 import type { UsedColor } from "../../types/template.js";
 
-export default async function imagePalleteCheck(req: Request<{}, {}, Express.Multer.File>, res: Response) {
+export default async function imagePalleteCheck(
+	req: Request<{}, {}, Express.Multer.File>,
+	res: Response,
+) {
 	if (!req.file) {
 		return res.status(400).json({
-			message: "Field 'image' is required"
+			message: "Field 'image' is required",
 		});
 	}
 
@@ -33,7 +36,7 @@ export default async function imagePalleteCheck(req: Request<{}, {}, Express.Mul
 	for (const [colorId, total] of colors.entries()) {
 		result.push({
 			colorId,
-			total
+			total,
 		});
 	}
 

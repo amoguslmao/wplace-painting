@@ -7,20 +7,20 @@ import imagePalleteCheck from "../../controllers/image/palleteCheck.js";
 
 const router = Router();
 
-const diskStorage = multer({ 
+const diskStorage = multer({
 	storage: multer.diskStorage({
 		destination: "./database/uploads",
 		filename(_, file, callback) {
 			const { originalname } = file;
 
 			callback(null, originalname.trim().replaceAll(" ", "_"));
-		}
-	})
+		},
+	}),
 });
 
 const memStorage = multer({
 	storage: multer.memoryStorage(),
-})
+});
 
 router.post("/pallete-check", memStorage.single("image"), imagePalleteCheck);
 router.post("/", diskStorage.single("image"), uploadImage);

@@ -2,14 +2,12 @@ import type { Request, Response } from "express";
 import { AccountManager } from "../../services/accountManager.js";
 import type { Account } from "../../base/account.js";
 
-export default async function getAllAccounts(_: Request,res: Response) {
+export default async function getAllAccounts(_: Request, res: Response) {
 	const accountManager = AccountManager.getInstance();
 
 	const { accounts } = accountManager;
 
 	const result: Pick<Account, "jwtToken" | "user" | "lastFetch" | "id">[] = [];
-
-	//console.log(accounts);
 
 	for (const account of accounts.values()) {
 		result.push({

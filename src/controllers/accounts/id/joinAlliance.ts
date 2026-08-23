@@ -2,10 +2,13 @@ import type { Request, Response } from "express";
 import type { IdParam, JoinAlliance } from "../../../types/request.js";
 import { AccountManager } from "../../../services/accountManager.js";
 
-export default async function joinAlliance(req: Request<IdParam, {}, JoinAlliance>, res: Response) {
+export default async function joinAlliance(
+	req: Request<IdParam, {}, JoinAlliance>,
+	res: Response,
+) {
 	if (!req.body || !req.body.allianceUUID) {
 		return res.status(400).json({
-			message: `Field "allianceUUID" is required.`
+			message: `Field "allianceUUID" is required.`,
 		});
 	}
 
@@ -17,7 +20,7 @@ export default async function joinAlliance(req: Request<IdParam, {}, JoinAllianc
 
 	if (!account) {
 		return res.status(404).json({
-			message: `Could not find account with ID ${accountId}`
+			message: `Could not find account with ID ${accountId}`,
 		});
 	}
 
@@ -26,18 +29,18 @@ export default async function joinAlliance(req: Request<IdParam, {}, JoinAllianc
 
 		if (result.status === "success") {
 			res.status(200).json({
-				message: result.message
+				message: result.message,
 			});
 		}
 		else {
 			res.status(400).json({
-				message: result.message
+				message: result.message,
 			});
 		}
 	} catch (error) {
 		res.status(500).json({
 			message: `An error occured while joining alliance for account ID ${accountId}`,
-			cause: error
+			cause: error,
 		});
 
 		console.error(error);

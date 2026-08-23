@@ -11,7 +11,7 @@ export default async function fetchUser(req: Request<IdParam>, res: Response) {
 
 	if (!account) {
 		return res.status(404).json({
-			message: `Could not find account with ID ${accountId}`
+			message: `Could not find account with ID ${accountId}`,
 		});
 	}
 
@@ -22,12 +22,12 @@ export default async function fetchUser(req: Request<IdParam>, res: Response) {
 
 		res.status(200).json({
 			message: `Fetched user ${me.name}#${me.id} with account ID ${accountId}`,
-			user: me
+			user: me,
 		});
 	} catch (error) {
 		res.status(500).json({
 			message: `An error occurred while fetching user with account ID ${accountId}`,
-			cause: (error as Error).message
+			cause: (error as Error).message,
 		});
 
 		console.error((error as Error).message);

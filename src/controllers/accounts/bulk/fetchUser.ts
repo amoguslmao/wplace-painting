@@ -4,16 +4,19 @@ import { AccountManager } from "../../../services/accountManager.js";
 import { sleep } from "../../../utils/promises.js";
 import { sendSSE } from "../../../utils/string.js";
 
-export default async function bulkFetchUser(req: Request<{}, {}, BulkFetchUser>, res: Response) {
+export default async function bulkFetchUser(
+	req: Request<{}, {}, BulkFetchUser>,
+	res: Response,
+) {
 	if (!req.body.ids) {
 		return res.status(400).json({
-			message: "Field 'ids' is required"
+			message: "Field 'ids' is required",
 		});
 	}
 
 	if (!Array.isArray(req.body.ids)) {
 		return res.status(400).json({
-			message: `Field "ids" must be an array`
+			message: `Field "ids" must be an array`,
 		});
 	}
 
@@ -37,10 +40,13 @@ export default async function bulkFetchUser(req: Request<{}, {}, BulkFetchUser>,
 
 		if (!account) {
 			res.write(
-				sendSSE(JSON.stringify({
-					message: `Could not find account with ID ${accountId}`,
-					accountId
-				}), "error")
+				sendSSE(
+					JSON.stringify({
+						message: `Could not find account with ID ${accountId}`,
+						accountId,
+					}),
+					"error",
+				),
 			);
 			continue;
 		}
@@ -51,19 +57,25 @@ export default async function bulkFetchUser(req: Request<{}, {}, BulkFetchUser>,
 			const me = await account.me();
 
 			res.write(
-				sendSSE(JSON.stringify({
-					message: `Fetched user ${me.name}#${me.id} with account ID ${accountId}`,
-					user: me,
-					accountId
-				}), "success")
+				sendSSE(
+					JSON.stringify({
+						message: `Fetched user ${me.name}#${me.id} with account ID ${accountId}`,
+						user: me,
+						accountId,
+					}),
+					"success",
+				),
 			);
 		} catch (error) {
 			res.write(
-				sendSSE(JSON.stringify({
-					message: `An error occurred while fetching user with account ID ${accountId}`,
-					cause: error,
-					accountId
-				}), "error")
+				sendSSE(
+					JSON.stringify({
+						message: `An error occurred while fetching user with account ID ${accountId}`,
+						cause: error,
+						accountId,
+					}),
+					"error",
+				),
 			);
 
 			console.error(error);

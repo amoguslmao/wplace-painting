@@ -4,19 +4,22 @@ import { AccountManager } from "../../services/accountManager.js";
 import { sleep } from "../../utils/promises.js";
 import { sendSSE } from "../../utils/string.js";
 
-export default async function bulkAddAccounts(req: Request<{}, {}, NeedJwtToken>, res: Response) {
+export default async function bulkAddAccounts(
+	req: Request<{}, {}, NeedJwtToken>,
+	res: Response,
+) {
 	if (!req.body.tokens) {
 		return res.status(400).json({
-			message: "Field 'jwtTokens' is required"
+			message: "Field 'jwtTokens' is required",
 		});
 	}
 
 	if (!Array.isArray(req.body.tokens)) {
 		return res.status(400).json({
-			message: `Field "jwtTokens" must be an array`
+			message: `Field "jwtTokens" must be an array`,
 		});
 	}
-	
+
 	const { tokens } = req.body;
 
 	try {
@@ -35,17 +38,23 @@ export default async function bulkAddAccounts(req: Request<{}, {}, NeedJwtToken>
 			const result = await accountManager.addAccount(tokens[i]);
 
 			res.write(
-				sendSSE(JSON.stringify({ message: result.message }), result.status)
+				sendSSE(
+					JSON.stringify({ message: result.message }),
+					result.status,
+				),
 			);
 		}
 
 		res.end();
 	} catch (error) {
 		res.write(
-			sendSSE(JSON.stringify({
-				message: "An error ocurred when fetching",
-				cause: error
-			}), "error")
+			sendSSE(
+				JSON.stringify({
+					message: "An error ocurred when fetching",
+					cause: error,
+				}),
+				"error",
+			),
 		);
 
 		res.end();
