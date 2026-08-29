@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import EnvConfig from "../config.js";
 import type { LogLevel } from "../types/utils.js";
 import { LOG_LEVEL_STYLES } from "../const/index.js";
 
@@ -14,23 +15,33 @@ export class Logger {
 	}
 
 	public error(...args: any[]) {
-		this.write("error", ...args);
+		if (EnvConfig.logLevel >= 0) {
+			this.write("error", ...args);
+		}
 	}
 
 	public warn(...args: any[]) {
-		this.write("warn", ...args);
+		if (EnvConfig.logLevel >= 1) {
+			this.write("warn", ...args);
+		}
 	}
 
 	public success(...args: any[]) {
-		this.write("success", ...args);
+		if (EnvConfig.logLevel >= 2) {
+			this.write("success", ...args);
+		}
 	}
 
 	public info(...args: any[]) {
-		this.write("info", ...args);
+		if (EnvConfig.logLevel >= 3) {
+			this.write("info", ...args);
+		}
 	}
 
 	public debug(...args: any[]) {
-		this.write("debug", ...args);
+		if (EnvConfig.logLevel >= 4) {
+			this.write("debug", ...args);
+		}
 	}
 
 	private write(level: LogLevel, ...args: any[]) {
