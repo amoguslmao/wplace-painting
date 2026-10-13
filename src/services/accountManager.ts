@@ -3,8 +3,10 @@ import { Account } from "../base/account.js";
 import { DatabaseInstance } from "./database.js";
 import { Cookie, CookieJar } from "tough-cookie";
 import EnvConfig from "../config.js";
-import type { DatabaseAccountInformation, WplaceUser } from "../types/users.js";
+import type { BrowserFingerprint, DatabaseAccountInformation, WplaceUser } from "../types/users.js";
 import type { OperationResult } from "../types/utils.js";
+import { randomInt } from "node:crypto";
+import { randomPlatform, randomViewport } from "../libs/browser.js";
 
 export class AccountManager {
 	private initialized = false;
@@ -58,7 +60,7 @@ export class AccountManager {
 		const impit = new Impit({
 			browser: "chrome142",
 			ignoreTlsErrors: true,
-			cookieJar
+			cookieJar,
 		});
 
 		const response = await impit.fetch(`${EnvConfig.baseURL}/me`, {
@@ -71,14 +73,10 @@ export class AccountManager {
 				"Pragma": "no-cache",
 				"Priority": "u=1, i",
 				"Referer": "https://wplace.live/",
-				"Sec-Ch-Ua": `"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"`,
-				"Sec-Ch-Ua-Mobile": `?0`,
-				"Sec-Ch-Ua-Platform": `"Windows"`,
 				"Sec-Fetch-Dest": "empty",
 				"Sec-Fetch-Mode": "cors",
 				"Sec-Fetch-Site": "same-site",
-				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
-			}
+			},
 		});
 
 		if (!response.ok) {
@@ -90,8 +88,7 @@ export class AccountManager {
 
 			if (contentType && contentType.includes("application/json")) {
 				responseText = await response.json();
-			}
-			else {
+			} else {
 				responseText = await response.text();
 			}
 
@@ -100,18 +97,20 @@ export class AccountManager {
 			return {
 				status: "failed",
 				message: `An error occured when fetching`,
-				data: responseText
-			}
+				data: responseText,
+			};
 		}
 
-		const result = await response.json() as WplaceUser;
+		const result = (await response.json()) as WplaceUser;
 
 		const database = DatabaseInstance.getInstance();
 
 		// TODO: kiểm tra xem có token mới nhất include trong response header hay ko
 		const setCookies = response.headers.getSetCookie();
 
-		const newToken = setCookies.map(cookie => Cookie.parse(cookie)).find(cookie => cookie?.key === "j");
+		const newToken = setCookies
+			.map((cookie) => Cookie.parse(cookie))
+			.find((cookie) => cookie?.key === "j");
 
 		if (newToken) {
 			console.log(`Got a new JWT Token when adding user ${result.name}#${result.id}`);
@@ -128,12 +127,11 @@ export class AccountManager {
 
 				// Update account vào map và db bằng set
 				account.user = result;
-				
 				account.jwtToken = jwtToken;
 
 				return {
 					status: "success",
-					message: `User ${account.user.name}#${account.user.id} has been added before`
+					message: `User ${account.user.name}#${account.user.id} has been added before`,
 				};
 			}
 		}
@@ -141,18 +139,30 @@ export class AccountManager {
 		// Nên nhớ rằng cho dù không có account nào trong db
 		// Thì cái query này đã add sẵn 1 account vào trước rồi
 		const addNewAccount = database.prepare<{
-			jwtToken: string,
-			lastFetch: number,
-			user: string
+			jwtToken: string;
+			lastFetch: number;
+			browserFingerprint: string;
+			user: string;
 		}>(`
-			INSERT INTO users (jwtToken, lastFetch, user)
-			VALUES (@jwtToken, @lastFetch, @user)
+			INSERT INTO users (jwtToken, lastFetch, browserFingerprint, user)
+			VALUES (@jwtToken, @lastFetch, @browserFingerprint, @user)
 		`);
+
+
+		const platform = randomPlatform();
+		const browserFingerprint: BrowserFingerprint = {
+			seed: randomInt(10_000, 99_999),
+			platform: platform,
+			viewport: randomViewport(platform),
+			storageQuotaMb: 500
+			// TODO: bỏ thêm locale với timezone khi mà có dùng proxy
+		}
 
 		addNewAccount.run({
 			jwtToken,
 			lastFetch: Date.now(),
-			user: JSON.stringify(result)
+			browserFingerprint: JSON.stringify(browserFingerprint),
+			user: JSON.stringify(result),
 		});
 
 		const getLastAccount = database.prepare<{}, DatabaseAccountInformation>(`
@@ -171,7 +181,7 @@ export class AccountManager {
 
 		return {
 			status: "success",
-			message: `Added user ${result.name}#${result.id}`
+			message: `Added user ${result.name}#${result.id}`,
 		};
 	}
 

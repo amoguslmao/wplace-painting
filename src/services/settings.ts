@@ -1,6 +1,13 @@
-import { DATA_FOLDER, SETTINGS_FILE_NAME } from "../const/index.js";
+import {
+	DATA_FOLDER,
+	DEFAULT_APP_SETTINGS,
+	SETTINGS_FILE_NAME,
+} from "../const/index.js";
 import type { SettingFields } from "../types/settings.js";
 import * as fs from "node:fs/promises";
+import { AppSettingSchema } from "../validate/index.js";
+import { ZodError } from "zod";
+import { Logger } from "../libs/logger.js";
 
 export class AppSetting {
 	private initialized = false;
@@ -27,7 +34,7 @@ export class AppSetting {
 		}
 
 		this._settings = value;
-	} 
+	}
 
 	public static getInstance() {
 		if (!this._instance) {
@@ -45,15 +52,50 @@ export class AppSetting {
 
 			const raw = await fs.readFile(this.settingFilePath, "utf-8");
 
-			this._settings = JSON.parse(raw) as SettingFields;
+			const setting = AppSettingSchema.parse(JSON.parse(raw));
+
+			this._settings = setting;
 		} catch (error) {
-			console.error(`An error occured when loading settings`, error);
+			const settingLogger = new Logger(["Service", "Setting"]);
+
+			if (error instanceof ZodError) {
+				settingLogger.error(
+					`Invalid setting from "${SETTINGS_FILE_NAME}". Make sure you are not breaking anything.`,
+				);
+				settingLogger.error(error);
+				settingLogger.warn(`Default setting will be used for fallback`);
+
+				this._settings = DEFAULT_APP_SETTINGS;
+				return;
+			}
+
+			if (error instanceof SyntaxError) {
+				settingLogger.error(
+					`Invalid JSON parse when reading file "${SETTINGS_FILE_NAME}". Check again your file.`,
+				);
+				settingLogger.error(error);
+				settingLogger.warn(`Default setting will be used for fallback`);
+
+				this._settings = DEFAULT_APP_SETTINGS;
+				return;
+			}
+
+			settingLogger.error(
+				`An unknown error occured when loading settings`,
+			);
+			settingLogger.error(error);
+			settingLogger.warn(`Default setting will be used for fallback`);
+
+			this._settings = DEFAULT_APP_SETTINGS;
 		}
 
 		this.initialized = true;
 	}
 
 	public async save() {
-		await fs.writeFile(this.settingFilePath, JSON.stringify(this._settings, null, 4));
+		await fs.writeFile(
+			this.settingFilePath,
+			JSON.stringify(this._settings, null, 4),
+		);
 	}
 }

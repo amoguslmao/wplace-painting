@@ -1,19 +1,22 @@
 import * as fs from "node:fs/promises";
-import { 
-	DATA_FOLDER, 
-	DEFAULT_APP_SETTINGS, 
-	SETTINGS_FILE_NAME, 
-	UPLOADS_FOLDER 
+import {
+	BROWSER_FOLDER,
+	DATA_FOLDER,
+	DEFAULT_APP_SETTINGS,
+	SETTINGS_FILE_NAME,
+	UPLOADS_FOLDER,
 } from "../const/index.js";
 
 async function dataFolderCheck() {
 	try {
 		await fs.access(`./${DATA_FOLDER}`, fs.constants.F_OK);
 	} catch (err) {
-		console.log(`Folder "${DATA_FOLDER}" doesnt exist. Creating new one...`);
+		console.log(
+			`Folder "${DATA_FOLDER}" doesnt exist. Creating new one...`,
+		);
 
 		await fs.mkdir(`./${DATA_FOLDER}`, { recursive: true });
-		
+
 		console.log(`Created "${DATA_FOLDER}" folder`);
 	}
 }
@@ -23,9 +26,10 @@ async function uploadsFolderCheck() {
 
 	try {
 		await fs.access(path, fs.constants.F_OK);
-	}
-	catch {
-		console.log(`Folder "${UPLOADS_FOLDER}" doesnt exist. Creating new one...`);
+	} catch {
+		console.log(
+			`Folder "${UPLOADS_FOLDER}" doesnt exist. Creating new one...`,
+		);
 
 		await fs.mkdir(path, { recursive: true });
 
@@ -38,9 +42,10 @@ async function settingsJSONCheck() {
 
 	try {
 		await fs.access(path, fs.constants.F_OK);
-	} 
-	catch {
-		console.log(`File "${SETTINGS_FILE_NAME}" doesnt exist. Creating new one...`);
+	} catch {
+		console.log(
+			`File "${SETTINGS_FILE_NAME}" doesnt exist. Creating new one...`,
+		);
 
 		await fs.writeFile(path, JSON.stringify(DEFAULT_APP_SETTINGS, null, 4));
 
@@ -48,8 +53,25 @@ async function settingsJSONCheck() {
 	}
 }
 
+async function browserFolderCheck() {
+	const path = `./${DATA_FOLDER}/${BROWSER_FOLDER}`;
+
+	try {
+		await fs.access(path, fs.constants.F_OK);
+	} catch {
+		console.log(
+			`Folder "${BROWSER_FOLDER}" doesnt exist. Creating a new one...`
+		);
+
+		await fs.mkdir(path);
+
+		console.log(`Created "${BROWSER_FOLDER}" folder`);
+	}
+}
+
 export async function checkFiles() {
 	await dataFolderCheck();
 	await uploadsFolderCheck();
+	await browserFolderCheck();
 	await settingsJSONCheck();
 }

@@ -6,62 +6,66 @@ import chalk from "chalk";
 
 export const TILE_SIZE = 1000 as const;
 
+export const TILE_COUNT = 2048 as const;
+
+export const WORLD_SIZE = TILE_COUNT * TILE_SIZE;
+
 export const DATA_FOLDER = "database" as const;
 
 export const UPLOADS_FOLDER = "uploads" as const;
+
+export const BROWSER_FOLDER = "profiles" as const;
 
 export const DATABASE_NAME = "data.db" as const;
 
 export const SETTINGS_FILE_NAME = "settings.json" as const;
 
+export const WPLACE_BACKEND_DOMAIN = "https://backend.wplace.live";
+
 export const MAX_CHARGE_ITEM = {
 	itemId: 70,
-	value: 500
+	value: 500,
 } as const;
 
 export const PAINT_CHARGE_ITEM = {
 	itemId: 80,
-	value: 500
+	value: 500,
 } as const;
 
 export const FLAG_ITEM = {
 	itemId: 110,
-	value: 20_000
+	value: 20_000,
 } as const;
 
 export const DEFAULT_APP_SETTINGS: SettingFields = {
 	bulkOperationCooldown: 5000,
 	paintMethod: "linear",
 	accountTurnCooldown: 5000,
-	chargeThreshold: 90
-}
+	chargeThreshold: 90,
+};
 
-export const LOG_LEVEL_STYLES: Record<
-	LogLevel, 
-	{ color: ChalkInstance, icon: string }
-> = {
+export const LOG_LEVEL_STYLES: Record<LogLevel, { color: ChalkInstance; icon: string }> = {
 	error: {
 		color: chalk.red,
-		icon: "✖"
+		icon: "✖",
 	},
 	warn: {
 		color: chalk.hex("#FFA500"),
-		icon: "⚠"
+		icon: "⚠",
 	},
 	success: {
 		color: chalk.green,
-		icon: "✔"
+		icon: "✔",
 	},
 	info: {
 		color: chalk.white,
-		icon: "ℹ"
+		icon: "ℹ",
 	},
 	debug: {
 		color: chalk.yellow,
-		icon: "⚙"
-	}
-}
-
+		icon: "⚙",
+	},
+};
 
 export const WPLACE_PALLETE: Record<number, ColorInformation> = {
 	0: { name: "Transparent", rgba: [0, 0, 0, 0], premium: false },
@@ -127,7 +131,7 @@ export const WPLACE_PALLETE: Record<number, ColorInformation> = {
 	60: { name: "Light Slate", rgba: [179, 185, 209, 255], premium: true },
 	61: { name: "Dark Stone", rgba: [109, 100, 63, 255], premium: true },
 	62: { name: "Stone", rgba: [148, 140, 107, 255], premium: true },
-	63: { name: "Light Stone", rgba: [205, 197, 158, 255], premium: true }
+	63: { name: "Light Stone", rgba: [205, 197, 158, 255], premium: true },
 };
 export const WPLACE_FLAGS = {
 	1: { name: "Afghanistan", code: "AF", flag: "🇦🇫" },
@@ -380,5 +384,167 @@ export const WPLACE_FLAGS = {
 	248: { name: "Zambia", code: "ZM", flag: "🇿🇲" },
 	249: { name: "Zimbabwe", code: "ZW", flag: "🇿🇼" },
 	250: { name: "Åland Islands", code: "AX", flag: "🇦🇽" },
-	251: { name: "Canary Islands", code: "IC", flag: "🇮🇨" }
+	251: { name: "Canary Islands", code: "IC", flag: "🇮🇨" },
 } as const;
+
+export const ENDPOINT_CLASS_METHODS = [
+	"constructor",
+	"online",
+	"serverTimeOffsetMs",
+	"hasServerTimeEstimate",
+	"getEstimatedServerNowMs",
+	"clampWaybackTimestamp",
+	"updateServerTimeEstimate",
+	"paint",
+	"selectAreaClear",
+	"createReverseSession",
+	"getReverseTimestamps",
+	"getReversePreview",
+	"getReverseTimelapse",
+	"applyReverse",
+	"sendPaintRequests",
+	"adminAutoPainterPaint",
+	"getPixelInfo",
+	"getPixelAreaInfo",
+	"me",
+	"meEmail",
+	"logout",
+	"driveStatus",
+	"driveConnect",
+	"driveToken",
+	"driveDisconnect",
+	"createEmbeddedCheckout",
+	"refreshStripeSession",
+	"refreshFastspringSession",
+	"getLastFastspringOrder",
+	"markFastspringOrderAsRead",
+	"getOtpCooldown",
+	"sendOtp",
+	"verifyChallenge",
+	"updateMe",
+	"deleteMe",
+	"favoriteLocation",
+	"deleteFavoriteLocation",
+	"updateFavoriteLocation",
+	"leaderboardPlayers",
+	"leaderboardAlliances",
+	"leaderboardRegions",
+	"leaderboardRegionPlayers",
+	"leaderboardRegionAlliances",
+	"leaderboardCountries",
+	"refreshHotspotsIfStale",
+	"getMapHotspots",
+	"getRandomTile",
+	"purchase",
+	"getAlliance",
+	"createAlliance",
+	"leaveAlliance",
+	"updateAllianceDescription",
+	"updateAllianceHeadquarters",
+	"allianceLeaderboard",
+	"getAllianceInvites",
+	"joinAlliance",
+	"getAllianceMembers",
+	"getAllianceBannedMembers",
+	"getAllianceById",
+	"searchAlliance",
+	"searchAlliances",
+	"getAllianceFull",
+	"getAdminAllianceMembers",
+	"renameAlliance",
+	"changeAllianceLeader",
+	"banAllAllianceMembers",
+	"setAllianceMemberRole",
+	"removeAllianceMember",
+	"giveAllianceAdmin",
+	"banAllianceUser",
+	"equipFlag",
+	"getMyProfilePictures",
+	"changeProfilePicture",
+	"unbanAllianceUser",
+	"health",
+	"getPlayAccountId",
+	"verifyPlayPurchase",
+	"verifyPendingPlayPurchases",
+	"getPlayClaimStatus",
+	"listPlayPurchaseHistory",
+	"getModeratorTickets",
+	"countMyTicketsClosedToday",
+	"getOpenTicketsCount",
+	"assignNewTickets",
+	"setTicketStatus",
+	"getLastResolvedTicket",
+	"getTicketReversalTicketInfo",
+	"createTicketReversal",
+	"listTicketReversals",
+	"getTicketReversal",
+	"reviewTicketReversal",
+	"request",
+	"overturnPunishment",
+	"getUserNotes",
+	"addUserNote",
+	"getUserPermissions",
+	"setUserPermissions",
+	"getUserPurchases",
+	"postSetUserDroplets",
+	"postAdminRenameUser",
+	"postAdminChangeUserEmail",
+	"getAdminUserProfilePictures",
+	"postAdminRemoveUserPicture",
+	"getUserTickets",
+	"getUserAppeals",
+	"getModerationTranslate",
+	"mapTicketsToReportRows",
+	"getModeratorClosedTicketStats",
+	"unlinkDiscord",
+	"deleteSessions",
+	"deleteAllUserSessions",
+	"banUsers",
+	"timeoutUsers",
+	"incrementUsersDroplets",
+	"postUnbanUsers",
+	"postBulkPhoneVerification",
+	"getAuditLogs",
+	"postUsersSuspend",
+	"postSelectAreaPhoneVerification",
+	"postDashboardUserPhoneVerification",
+	"postReportUserName",
+	"postReportAllianceName",
+	"submitBanAppeal",
+	"getOpenAppeals",
+	"postSolveAppeal",
+	"getUserLastAppeal",
+	"getMySuspensionDetails",
+	"assignAppeals",
+	"getNotificationCount",
+	"getNotificationPage",
+	"postNotificationMarkRead",
+	"postNotificationMarkReadAll",
+	"getAnticheatStats",
+	"getAnticheatSignals",
+	"getAnticheatUserJourney",
+	"getAnticheatSignalAnalysis",
+	"getPendingAppealsCount",
+	"getUserPixelsPaintedToday",
+	"getUserFrames",
+	"postEquipUserFrame",
+	"getUserBadges",
+	"postEquipUserBadge",
+	"postCaptchaSession",
+];
+
+export const USER_CLASS_METHODS = [
+	"data",
+	"loading",
+	"notificationCount",
+	"lastFetch",
+	"charges",
+	"cooldown",
+	"flagsBitmap",
+	"timeoutUntil",
+	"refresh",
+	"logout",
+	"hasColor",
+	"hasPermission",
+	"hasAnyPermission",
+];

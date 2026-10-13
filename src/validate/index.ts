@@ -12,10 +12,10 @@ export const TemplateImageInformationSchema = z.object({
 });
 
 export const TemplateCoordinatesSchema = z.tuple([
-	z.number().int(),      // tileX
-	z.number().int(),      // tileY
-	z.number().int(),      // pixelX
-	z.number().int(),      // pixelY
+	z.number().int(), // tileX
+	z.number().int(), // tileY
+	z.number().int(), // pixelX
+	z.number().int(), // pixelY
 ]);
 
 export const TemplateSettingSchema = z.object({
@@ -24,7 +24,10 @@ export const TemplateSettingSchema = z.object({
 	outlineFirst: z.boolean(),
 	autoStart: z.boolean(),
 	purchase: z.object({
-		buyMaxCharges: z.union([z.literal(false), z.number().int().nonnegative()]),
+		buyMaxCharges: z.union([
+			z.literal(false),
+			z.number().int().nonnegative(),
+		]),
 		buyPaintCharges: z.boolean(),
 		buyPremiumColors: z.boolean(),
 	}),
@@ -44,12 +47,24 @@ export const UpdateTemplateSchema = z.object({
 	name: z.string().min(1),
 	assignedAccounts: z.array(z.number().int().nonnegative()),
 	coordinates: TemplateCoordinatesSchema,
-	setting: TemplateSettingSchema
+	setting: TemplateSettingSchema,
 });
 
 export const AppSettingSchema = z.object({
 	bulkOperationCooldown: z.number().int().nonnegative(),
 	paintMethod: z.string(),
 	accountTurnCooldown: z.number().int().nonnegative(),
-	chargeThreshold: z.number().int().nonnegative().min(0).max(100)
+	chargeThreshold: z.number().int().nonnegative().min(0).max(100),
+});
+
+export const BrowserFingerprintSchema = z.object({
+	seed: z.int().positive(),
+	platform: z.enum(["windows", "macos", "linux"]),
+	viewport: z.object({
+		width: z.number().int().positive(),
+		height: z.number().int().positive(),
+	}),
+	storageQuotaMb: z.number().int().nonnegative(),
+	locale: z.string().optional(),
+	timezone: z.string().optional(),
 });

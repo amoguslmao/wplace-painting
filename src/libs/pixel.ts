@@ -1,6 +1,6 @@
 import EnvConfig from "../config.js";
-import { TILE_SIZE } from "../const/index.js";
-import type { GlobalPixel, Pixel, PixelInformation } from "../types/pixel.js";
+import { TILE_SIZE, WORLD_SIZE } from "../const/index.js";
+import type { GlobalPixel, Pixel, PixelInformation, WorldCoordinate } from "../types/pixel.js";
 import type { TemplateCoordinates } from "../types/template.js";
 import { arrayEquals, matchingPallete } from "./color.js";
 import { ImageManiputation } from "./imageManiputation.js";
@@ -11,48 +11,48 @@ export function toPixel(coordinates: TemplateCoordinates): Pixel {
 		y: coordinates[3],
 		tile: {
 			x: coordinates[0],
-			y: coordinates[1]
-		}
-	}
+			y: coordinates[1],
+		},
+	};
 }
 
 export function toGlobalPixel(pixel: Pixel): Omit<Pixel, "tile"> {
 	return {
 		x: pixel.x + pixel.tile.x * TILE_SIZE,
-		y: pixel.y + pixel.tile.y * TILE_SIZE
-	}
+		y: pixel.y + pixel.tile.y * TILE_SIZE,
+	};
 }
 
 export function toTilePixel(globalPixel: GlobalPixel): Pixel {
 	return {
 		tile: {
 			x: Math.floor(globalPixel.x / TILE_SIZE),
-			y: Math.floor(globalPixel.y / TILE_SIZE)
+			y: Math.floor(globalPixel.y / TILE_SIZE),
 		},
 		x: globalPixel.x % TILE_SIZE,
-		y: globalPixel.y % TILE_SIZE
-	}
+		y: globalPixel.y % TILE_SIZE,
+	};
 }
 
 export function localToGlobalPixel(localPixel: GlobalPixel, globalPixel: GlobalPixel): GlobalPixel {
 	return {
 		x: globalPixel.x + localPixel.x,
-		y: globalPixel.y + localPixel.y
-	}
+		y: globalPixel.y + localPixel.y,
+	};
 }
 
 export function normalizeSelection(first: Pixel, second: Pixel) {
 	const globalFirstPoint = toGlobalPixel(first);
 	const globalSecondPoint = toGlobalPixel(second);
 
-	const start: GlobalPixel = { 
-		x: Math.min(globalFirstPoint.x, globalSecondPoint.x), 
-		y: Math.min(globalFirstPoint.y, globalSecondPoint.y) 
-	}
-	const end: GlobalPixel = { 
-		x: Math.max(globalFirstPoint.x, globalSecondPoint.x), 
-		y: Math.max(globalFirstPoint.y, globalSecondPoint.y) 
-	}
+	const start: GlobalPixel = {
+		x: Math.min(globalFirstPoint.x, globalSecondPoint.x),
+		y: Math.min(globalFirstPoint.y, globalSecondPoint.y),
+	};
+	const end: GlobalPixel = {
+		x: Math.max(globalFirstPoint.x, globalSecondPoint.x),
+		y: Math.max(globalFirstPoint.y, globalSecondPoint.y),
+	};
 
 	return { start, end };
 }
@@ -64,6 +64,25 @@ export function calculateArea(a: Pixel, b: Pixel) {
 	const height = end.y - start.y + 1;
 
 	return { width, height, area: width * height };
+}
+
+export function pixelToLatLon(pixel: Pixel): WorldCoordinate {
+	const worldX = pixel.tile.x * TILE_SIZE + pixel.x + 0.5;
+	const worldY = pixel.tile.y * TILE_SIZE + pixel.y + 0.5;
+
+	const lon = (worldX / WORLD_SIZE) * 360 - 180;
+
+	const mercatorY = Math.PI * (1 - 2 * worldY / WORLD_SIZE);
+	const latRad = Math.atan(Math.sinh(mercatorY));
+	const lat = radToDeg(latRad);
+
+	return {
+		lat, lon
+	};
+}
+
+function radToDeg(rad: number): number {
+	return (rad * 180) / Math.PI;
 }
 
 /**
@@ -78,7 +97,7 @@ export function calculateLastPixel(firstPixel: Pixel, height: number, width: num
 
 	const lastPixel = toTilePixel({
 		x: globalPixel.x + width - 1,
-		y: globalPixel.y + height - 1
+		y: globalPixel.y + height - 1,
 	});
 
 	return lastPixel;
@@ -100,8 +119,8 @@ export async function getTile(tileX: number, tileY: number): Promise<ImageManipu
 			"sec-ch-ua-platform": `"Windows"`,
 			"sec-fetch-dest": "empty",
 			"sec-fetch-mode": "cors",
-			"sec-fetch-site": "same-site"
-		}
+			"sec-fetch-site": "same-site",
+		},
 	});
 
 	const image = await ImageManiputation.create(await response.arrayBuffer());
@@ -110,7 +129,11 @@ export async function getTile(tileX: number, tileY: number): Promise<ImageManipu
 }
 
 export class PaintingMethod {
-	public constructor(private imageFromTiles: ImageManiputation, private originImage: ImageManiputation, private count: number) {}
+	public constructor(
+		private imageFromTiles: ImageManiputation,
+		private originImage: ImageManiputation,
+		private count: number,
+	) {}
 
 	public linear(reverse: boolean = false): PixelInformation[] {
 		const { width, height } = this.imageFromTiles.metadata;
@@ -125,15 +148,15 @@ export class PaintingMethod {
 				const colorId = matchingPallete(this.originImage.getPixel(x, y));
 
 				if (
-					colorId &&
-					!arrayEquals(
-						this.imageFromTiles.getPixel(x, y),
+					colorId && !arrayEquals(
+						this.imageFromTiles.getPixel(x, y), 
 						this.originImage.getPixel(x, y)
 					)
 				) {
 					result.push({
-						x, y,
-						color: colorId
+						x,
+						y,
+						color: colorId,
 					});
 				}
 			}
@@ -145,6 +168,6 @@ export class PaintingMethod {
 	public random() {
 		// TODO: sẽ implement cái này sau
 	}
-	
+
 	// TODO: thêm các hàm để kiểm tra ảnh
 }

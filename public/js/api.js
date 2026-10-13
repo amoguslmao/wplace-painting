@@ -113,7 +113,7 @@ async function getLogs(limit = 100) {
  * Lấy queue
  */
 async function getQueue() {
-	return apiCall("/queue", { method: "GET" });
+	return apiCall("/accounts/queue", { method: "GET" });
 }
 
 export {

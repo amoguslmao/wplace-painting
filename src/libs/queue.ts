@@ -1,7 +1,6 @@
 import { AccountManager } from "../services/accountManager.js";
 import { AppSetting } from "../services/settings.js";
 import type { AccountPredictedCharge } from "../types/users.js";
-import { sleep } from "../utils/promises.js";
 
 export class AccountQueue {
 	public constructor(private ids: number[]) {}
@@ -26,10 +25,13 @@ export class AccountQueue {
 			if (predictedCharges >= targetCharges) {
 				result.push({
 					id: account.id,
-					predictedCharges: Math.min(predictedCharges, account.user.charges.max),
+					predictedCharges: Math.min(
+						predictedCharges,
+						account.user.charges.max,
+					),
 					maxCharges: account.user.charges.max,
 					cooldown: account.user.charges.cooldownMs,
-					waitTime: 0
+					waitTime: 0,
 				});
 
 				continue;
@@ -42,31 +44,24 @@ export class AccountQueue {
 				predictedCharges: predictedCharges,
 				maxCharges: account.user.charges.max,
 				cooldown: account.user.charges.cooldownMs,
-				waitTime: Math.ceil(leftCharge * account.user.charges.cooldownMs)
+				waitTime: Math.ceil(
+					leftCharge * account.user.charges.cooldownMs,
+				),
 			});
 		}
 
-		result.sort((a,b) => {
+		result.sort((a, b) => {
 			return a.waitTime - b.waitTime;
 		});
 
 		return result;
- 	}
+	}
 
 	/**
-	 * Get the refilling account, if there is no account is have enough charge, then it will
-	 * sleep until the account is full charges
+	 * Get the first refilling account
 	 * @returns Return account that refilled charges
 	 */
-	public async getFirstRefillingAccount() {
-		const first = this.getQueue()[0];
-
-		if (first.waitTime !== 0) {
-			console.log(`[Queue] No account was refilled. Need to wait ${first.waitTime}ms`);
-
-			await sleep(first.waitTime);
-		}
-
-		return first;
+	public getFirstRefillingAccount() {
+		return this.getQueue()[0];
 	}
 }

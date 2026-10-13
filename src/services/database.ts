@@ -16,6 +16,7 @@ export class DatabaseInstance extends Database {
 				id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 				jwtToken TEXT NOT NULL,
 				lastFetch INT NOT NULL,
+				browserFingerprint TEXT NOT NULL,
 				user TEXT NOT NULL
 			);
 		`);

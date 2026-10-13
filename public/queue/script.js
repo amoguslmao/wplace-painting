@@ -1,4 +1,4 @@
-import { getQueue } from "/js/api.js";
+import { getQueue } from "../js/api.js";
 
 const QueueManager = (() => {
 	let queueData = [];
@@ -19,7 +19,7 @@ const QueueManager = (() => {
 	const fetchQueueNow = async () => {
 		try {
 			const response = await getQueue();
-			queueData = response.data || [];
+			queueData = response || [];
 
 			renderQueue();
 			updateStats();
@@ -59,8 +59,8 @@ const QueueManager = (() => {
 
 		// Sort queue items
 		const sortedQueue = [...queueData].sort((a, b) => {
-			const timeA = new Date(a.chargeUntil).getTime();
-			const timeB = new Date(b.chargeUntil).getTime();
+			const timeA = new Date(a.waitTime).getTime();
+			const timeB = new Date(b.waitTime).getTime();
 			return sortAscending ? timeA - timeB : timeB - timeA;
 		});
 
@@ -74,8 +74,8 @@ const QueueManager = (() => {
 		sortedQueue.forEach((item, index) => {
 			startTimer(
 				item.id || index,
-				item.chargeUntil,
-				item.charges.cooldownMs,
+				item.waitTime,
+				item.cooldown,
 			);
 		});
 	};
@@ -84,13 +84,15 @@ const QueueManager = (() => {
 	 * Tạo queue item element
 	 */
 	const createQueueItem = (item, index) => {
-		const chargeUntilTime = new Date(item.chargeUntil);
+		const chargeUntilTime = new Date(item.waitTime);
 		const now = new Date();
-		const isCharging = chargeUntilTime > now;
-		const timeRemaining = Math.max(
-			0,
-			chargeUntilTime.getTime() - now.getTime(),
-		);
+		const isCharging = item.waitTime !== 0;
+		// const timeRemaining = Math.max(
+		// 	0,
+		// 	chargeUntilTime.getTime() - now.getTime(),
+		// );
+
+		const timeRemaining = item.waitTime;
 
 		const statusClass = isCharging ? "charging" : "ready";
 		const statusText = isCharging ? "⏳ Đang Charge" : "✅ Sẵn sàng";
@@ -106,15 +108,15 @@ const QueueManager = (() => {
 		const headerDiv = document.createElement("div");
 		headerDiv.className = "queue-item-header";
 
-		const nameSpan = document.createElement("span");
-		nameSpan.className = "queue-account-name";
-		nameSpan.textContent = `${item.user.name}#${item.user.id}`;
+		// const nameSpan = document.createElement("span");
+		// nameSpan.className = "queue-account-name";
+		// nameSpan.textContent = `${item.user.name}#${item.user.id}`;
 
 		const statusSpan = document.createElement("span");
 		statusSpan.className = `queue-item-status ${statusClass}`;
 		statusSpan.textContent = statusText;
 
-		headerDiv.appendChild(nameSpan);
+		// headerDiv.appendChild(nameSpan);
 		headerDiv.appendChild(statusSpan);
 
 		// Details
@@ -123,20 +125,20 @@ const QueueManager = (() => {
 
 		const chargesDetail = createQueueDetail(
 			"Charges Hiện tại",
-			`${item.charges.count}/${item.charges.max}`,
+			`${item.predictedCharges}/${item.maxCharges}`,
 		);
 		const cooldownDetail = createQueueDetail(
 			"Cooldown",
-			`${(item.charges.cooldownMs / 1000).toFixed(1)}s`,
+			`${(item.cooldown / 1000).toFixed(1)}s`,
 		);
-		const allianceDetail = createQueueDetail(
-			"Alliance",
-			item.user.allianceId || "N/A",
-		);
+		// const allianceDetail = createQueueDetail(
+		// 	"Alliance",
+		// 	item.user.allianceId || "N/A",
+		// );
 
 		detailsDiv.appendChild(chargesDetail);
 		detailsDiv.appendChild(cooldownDetail);
-		detailsDiv.appendChild(allianceDetail);
+		// detailsDiv.appendChild(allianceDetail);
 
 		// Progress bar if charging
 		if (isCharging) {
@@ -206,10 +208,12 @@ const QueueManager = (() => {
 
 		const updateTimer = () => {
 			const now = new Date();
-			const timeRemaining = Math.max(
-				0,
-				chargeUntil.getTime() - now.getTime(),
-			);
+			// const timeRemaining = Math.max(
+			// 	0,
+			// 	chargeUntil.getTime() - now.getTime(),
+			// );
+
+			const timeRemaining = chargeUntilTime;
 
 			const timerElement = document.getElementById(`timer-${id}`);
 			if (timerElement) {
@@ -238,23 +242,25 @@ const QueueManager = (() => {
 	/**
 	 * Get progress percentage
 	 */
-	const getProgressPercentage = (chargeUntilTime) => {
-		const chargeUntil = new Date(chargeUntilTime);
+	const getProgressPercentage = (waitTime) => {
+		const chargeUntil = new Date(waitTime);
 		const now = new Date();
-		const timeRemaining = Math.max(
-			0,
-			chargeUntil.getTime() - now.getTime(),
-		);
+		// const timeRemaining = Math.max(
+		// 	0,
+		// 	chargeUntil.getTime() - now.getTime(),
+		// );
+
+		const timeRemaining = waitTime;
 
 		// Tìm item để lấy cooldownMs
 		const queueItem = queueData.find((item) => {
-			const until = new Date(item.chargeUntil);
+			const until = new Date(item.waitTime);
 			return until.getTime() === chargeUntil.getTime();
 		});
 
 		if (!queueItem) return 100;
 
-		const cooldownMs = queueItem.charges.cooldownMs || 30000;
+		const cooldownMs = queueItem.cooldown || 30000;
 		const progress = ((cooldownMs - timeRemaining) / cooldownMs) * 100;
 		return Math.min(100, Math.max(0, progress));
 	};
@@ -282,16 +288,16 @@ const QueueManager = (() => {
 	 */
 	const updateStats = () => {
 		const chargingCount = queueData.filter((item) => {
-			const chargeUntil = new Date(item.chargeUntil);
+			const chargeUntil = new Date(item.waitTime);
 			return chargeUntil > new Date();
 		}).length;
 
 		const totalCharges = queueData.reduce(
-			(sum, item) => sum + item.charges.max,
+			(sum, item) => sum + item.maxCharges,
 			0,
 		);
 		const usedCharges = queueData.reduce(
-			(sum, item) => sum + (item.charges.max - item.charges.count),
+			(sum, item) => sum + (item.maxCharges - item.predictedCharges),
 			0,
 		);
 

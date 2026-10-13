@@ -1,10 +1,10 @@
 import EnvConfig from "./config.js";
-import { checkFiles } from "./utils/checkFiles.js";
 import express from "express";
 import cors from "cors";
-
 import routers from "./routers/index.js";
+
 import { exit } from "./utils/process.js";
+import { checkFiles } from "./utils/checkFiles.js";
 import { DatabaseInstance } from "./services/database.js";
 import { AccountManager } from "./services/accountManager.js";
 import { TemplateManager } from "./services/templateManager.js";
@@ -12,17 +12,17 @@ import { AppSetting } from "./services/settings.js";
 import { Logger } from "./libs/logger.js";
 
 const logger = new Logger();
-
 const servicesLogger = logger.getLogger("service");
 const apiLogger = logger.getLogger("API");
 
-// Database
-const db = DatabaseInstance.getInstance();
-servicesLogger.success("Database started");
+let templateManager: TemplateManager | undefined, database: DatabaseInstance | undefined;
 
-process.on("SIGINT", () => exit(db));
-process.on("SIGKILL", () => exit(db));
-process.on("SIGTERM", () => exit(db));
+process.on("SIGINT", () => exit(database, templateManager));
+process.on("SIGTERM", () => exit(database, templateManager));
+
+// Database
+database = DatabaseInstance.getInstance();
+servicesLogger.success("Database started");
 
 // Checking the folder and some important file
 await checkFiles();
@@ -42,11 +42,16 @@ await accountManager.init();
 servicesLogger.success("Account Manager is initilized");
 
 // Templates
-const templateManager = TemplateManager.getInstance();
+templateManager = TemplateManager.getInstance();
 
-templateManager.init();
+await templateManager.init();
 
 servicesLogger.success("Template Manager is initilized");
+
+if (EnvConfig.instanceType === "openplace") {
+	logger.warn(`Currently using "${EnvConfig.instanceType}" instance! Some function will be restricted,`);
+	logger.warn("because openplace instance did not up-to-date with wplace.");
+}
 
 // API
 const app = express();
@@ -63,5 +68,5 @@ app.listen(EnvConfig.port, EnvConfig.host, (err) => {
 		process.exit(1);
 	}
 
-	apiLogger.success(`API running on ${EnvConfig.host}:${EnvConfig.port}`);
+	apiLogger.success(`API is running on ${EnvConfig.host}:${EnvConfig.port}`);
 });
